@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>카메라 테스트</title>
+<style>
+  :root { --bg:#000; --fg:#fff; --muted:#aaa; --accent:#ffcc00; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  body { display:flex; flex-direction:column; }
+  .stage { position:relative; flex:1; overflow:hidden; background:#111; }
+  video { width:100%; height:100%; object-fit:cover; display:block; }
+  video.mirror { transform:scaleX(-1); }
+  .flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .25s; }
+  .flash.on { opacity:.8; transition:none; }
+  .msg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; padding:24px; text-align:center; color:var(--muted); line-height:1.5; }
+  .msg[hidden] { display:none; }
+  .msg button { font-size:16px; padding:12px 20px; border-radius:999px; border:0; background:var(--accent); color:#000; font-weight:600; }
+  .controls { display:flex; align-items:center; justify-content:space-around; padding:16px 16px calc(16px + env(safe-area-inset-bottom)); background:#000; }
+  .side { width:56px; height:56px; border-radius:12px; border:2px solid #444; background:#222 center/cover no-repeat;
+    color:var(--fg); font-size:22px; display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; }
+  .side:disabled { opacity:.35; cursor:default; }
+  .shutter { width:76px; height:76px; border-radius:50%; border:5px solid #fff; background:#fff; box-shadow:inset 0 0 0 4px #000; cursor:pointer; }
+  .shutter:active { transform:scale(.94); }
+  .shutter:disabled { opacity:.35; }
+  .gallery { position:fixed; inset:0; background:rgba(0,0,0,.95); display:flex; flex-direction:column; z-index:10; }
+  .gallery[hidden] { display:none; }
+  .gallery header { display:flex; align-items:center; justify-content:space-between; padding:16px; padding-top:calc(16px + env(safe-area-inset-top)); }
+  .gallery header button { background:none; border:0; color:var(--fg); font-size:16px; padding:8px; }
+  .grid { flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:8px; padding:0 16px 16px; }
+  .item { position:relative; }
+  .item img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:8px; display:block; background:#222; }
+  .item .acts { display:flex; gap:6px; margin-top:6px; }
+  .item .acts a, .item .acts button { flex:1; text-align:center; font-size:13px; padding:8px 0; border-radius:8px;
+    background:#333; color:var(--fg); text-decoration:none; border:0; }
+  .empty { color:var(--muted); padding:32px 16px; text-align:center; grid-column:1/-1; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="flash" id="flash"></div>
+    <div class="msg" id="msg">
+      <div id="msgText">카메라를 사용하려면 권한을 허용해 주세요.</div>
+      <button id="startBtn" type="button">카메라 켜기</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="side" id="galleryBtn" type="button" aria-label="갤러리" disabled>🖼</button>
+    <button class="shutter" id="shutter" type="button" aria-label="사진 찍기" disabled></button>
+    <button class="side" id="switchBtn" type="button" aria-label="카메라 전환" disabled>🔄</button>
+  </div>
+
+  <div class="gallery" id="gallery" hidden>
+    <header>
+      <strong id="galleryTitle">찍은 사진</strong>
+      <button id="closeGallery" type="button">닫기 ✕</button>
+    </header>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <canvas id="canvas" hidden></canvas>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const video = $('video'), canvas = $('canvas'), msg = $('msg'), msgText = $('msgText');
+  const startBtn = $('startBtn'), shutter = $('shutter'), switchBtn = $('switchBtn');
+  const galleryBtn = $('galleryBtn'), gallery = $('gallery'), grid = $('grid');
+
+  let stream = null;
+  let facing = 'environment';   // 'user' = 전면, 'environment' = 후면
+  const photos = [];            // { url, name } (이 탭에서만 유지, 새로고침하면 사라짐)
+
+  function showMsg(text, withButton = true) {
+    msgText.textContent = text;
+    startBtn.hidden = !withButton;
+    msg.hidden = false;
+  }
+
+  async function startCamera() {
+    if (!window.isSecureContext) {
+      showMsg('카메라는 https 주소(또는 localhost)에서만 동작합니다. 지금 주소: ' + location.protocol + '//' + location.host, false);
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showMsg('이 브라우저는 카메라 접근을 지원하지 않습니다.', false);
+      return;
+    }
+    stopCamera();
+    showMsg('카메라 연결 중…', false);
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false
+      });
+    } catch (err) {
+      const reasons = {
+        NotAllowedError: '카메라 권한이 거부됐습니다. 브라우저 주소창의 설정에서 카메라를 허용한 뒤 다시 시도해 주세요.',
+        NotFoundError: '사용할 수 있는 카메라를 찾지 못했습니다.',
+        NotReadableError: '다른 앱이 카메라를 사용 중입니다. 다른 앱을 닫고 다시 시도해 주세요.',
+        OverconstrainedError: '요청한 카메라 설정을 지원하지 않습니다.'
+      };
+      showMsg(reasons[err.name] || ('카메라를 켜지 못했습니다: ' + err.name + ' ' + err.message));
+      return;
+    }
+    video.srcObject = stream;
+    await video.play().catch(() => {});
+    const settings = stream.getVideoTracks()[0].getSettings();
+    if (settings.facingMode) facing = settings.facingMode;
+    // 전면 카메라(또는 노트북 웹캠)는 거울처럼 보이게
+    video.classList.toggle('mirror', facing === 'user' || !settings.facingMode);
+    msg.hidden = true;
+    shutter.disabled = false;
+    galleryBtn.disabled = false;
+    updateSwitchButton();
+  }
+
+  function stopCamera() {
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    stream = null;
+  }
+
+  async function updateSwitchButton() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      switchBtn.disabled = devices.filter((d) => d.kind === 'videoinput').length < 2;
+    } catch { switchBtn.disabled = true; }
+  }
+
+  function takePhoto() {
+    if (!stream || !video.videoWidth) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (video.classList.contains('mirror')) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(video, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    const flash = $('flash');
+    flash.classList.add('on');
+    requestAnimationFrame(() => requestAnimationFrame(() => flash.classList.remove('on')));
+
+    canvas.toBlob((blob) => {
+      const d = new Date(), p = (n) => String(n).padStart(2, '0');
+      const name = `photo_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.jpg`;
+      const url = URL.createObjectURL(blob);
+      photos.unshift({ url, name });
+      galleryBtn.style.backgroundImage = `url(${url})`;
+      galleryBtn.textContent = '';
+      renderGallery();
+    }, 'image/jpeg', 0.92);
+  }
+
+  function renderGallery() {
+    $('galleryTitle').textContent = `찍은 사진 (${photos.length})`;
+    grid.innerHTML = '';
+    if (!photos.length) {
+      grid.innerHTML = '<div class="empty">아직 찍은 사진이 없습니다.</div>';
+      return;
+    }
+    photos.forEach((ph, i) => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML = `<img alt=""><div class="acts"><a>저장</a><button type="button">삭제</button></div>`;
+      item.querySelector('img').src = ph.url;
+      const a = item.querySelector('a');
+      a.href = ph.url; a.download = ph.name;
+      item.querySelector('button').onclick = () => {
+        URL.revokeObjectURL(ph.url);
+        photos.splice(i, 1);
+        galleryBtn.style.backgroundImage = photos[0] ? `url(${photos[0].url})` : '';
+        galleryBtn.textContent = photos[0] ? '' : '🖼';
+        renderGallery();
+      };
+      grid.appendChild(item);
+    });
+  }
+
+  startBtn.onclick = startCamera;
+  shutter.onclick = takePhoto;
+  switchBtn.onclick = () => { facing = facing === 'user' ? 'environment' : 'user'; startCamera(); };
+  galleryBtn.onclick = () => { renderGallery(); gallery.hidden = false; };
+  $('closeGallery').onclick = () => { gallery.hidden = true; };
+  document.addEventListener('keydown', (e) => { if (e.code === 'Space' && gallery.hidden) { e.preventDefault(); takePhoto(); } });
+
+  // 권한이 이미 허용돼 있으면 바로 켜기
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'camera' }).then((s) => { if (s.state === 'granted') startCamera(); }).catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
