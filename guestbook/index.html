@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>축하 방명록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#fbf6ee; --panel:#ffffff; --ink:#2b2622; --muted:#8a7f74; --line:#e8dfd2;
+    --accent:#e2574c; --accent-ink:#fff; --card:#ffffff; --shadow:0 6px 20px rgba(60,40,20,.12);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; min-height:100%; background:var(--bg); color:var(--ink);
+    font-family:"Gowun Dodum", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  button, input, textarea { font:inherit; color:inherit; }
+  header { text-align:center; padding:20px 16px 4px; }
+  header h1 { margin:0; font-size:clamp(28px, 5vw, 44px); letter-spacing:-.5px; }
+  header p { margin:6px 0 0; color:var(--muted); }
+
+  main { display:grid; grid-template-columns:minmax(0, 440px) minmax(0, 1fr); gap:28px; max-width:1400px; margin:0 auto; padding:20px 24px 40px; align-items:start; }
+  @media (max-width: 900px) { main { grid-template-columns:1fr; padding:16px; } }
+
+  .composer { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:var(--shadow); position:sticky; top:16px; }
+  @media (max-width: 900px) { .composer { position:static; } }
+  .stage { position:relative; aspect-ratio:4/3; border-radius:14px; overflow:hidden; background:#1b1816; }
+  .stage video, .stage img { width:100%; height:100%; object-fit:cover; display:block; }
+  .stage video { transform:scaleX(-1); }
+  .stage img[hidden], .stage video[hidden] { display:none; }
+  .count { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:120px; color:#fff;
+    text-shadow:0 4px 20px rgba(0,0,0,.5); pointer-events:none; }
+  .count:empty { display:none; }
+  .flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .35s; }
+  .flash.on { opacity:.9; transition:none; }
+  .camMsg { position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; text-align:center;
+    color:#ddd; padding:20px; line-height:1.5; }
+  .camMsg[hidden] { display:none; }
+
+  label { display:block; font-size:14px; color:var(--muted); margin:12px 0 6px; }
+  input[type=text], textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fffdf9; outline:none; }
+  input[type=text]:focus, textarea:focus { border-color:var(--accent); }
+  textarea { resize:vertical; min-height:80px; font-family:"Nanum Pen Script", cursive; font-size:24px; line-height:1.3; }
+  .counter { text-align:right; font-size:12px; color:var(--muted); margin-top:4px; }
+  .row { display:flex; gap:10px; margin-top:14px; }
+  .btn { flex:1; border:0; border-radius:999px; padding:14px 18px; font-size:17px; cursor:pointer; background:#efe7dc; }
+  .btn.primary { background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .btn:disabled { opacity:.45; cursor:default; }
+  .btn[hidden] { display:none; }
+
+  .wallHead { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .wallHead h2 { margin:0; font-size:22px; }
+  .wallHead .tools { display:flex; gap:8px; }
+  .small { border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:8px 14px; font-size:14px; cursor:pointer; }
+  .wall { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:22px; }
+  .empty { grid-column:1/-1; color:var(--muted); text-align:center; padding:60px 16px; border:2px dashed var(--line); border-radius:20px; }
+  .card { background:var(--card); padding:12px 12px 16px; box-shadow:var(--shadow); border-radius:4px; position:relative; transition:transform .2s; }
+  .card:nth-child(4n+1) { transform:rotate(-1.5deg); }
+  .card:nth-child(4n+2) { transform:rotate(1deg); }
+  .card:nth-child(4n+3) { transform:rotate(-.5deg); }
+  .card:nth-child(4n) { transform:rotate(1.6deg); }
+  .card:hover { transform:rotate(0) scale(1.02); z-index:1; }
+  .card.new { animation:drop .5s ease-out; }
+  @keyframes drop { from { opacity:0; transform:translateY(-20px) scale(.95); } }
+  .card img { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#eee; }
+  .card .text { font-family:"Nanum Pen Script", cursive; font-size:24px; line-height:1.2; margin:12px 4px 6px; white-space:pre-wrap; word-break:break-word; }
+  .card .meta { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:0 4px; }
+  .card .acts { position:absolute; top:18px; right:18px; display:flex; gap:6px; opacity:0; transition:opacity .2s; }
+  .card:hover .acts, .card:focus-within .acts { opacity:1; }
+  @media (hover:none) { .card .acts { opacity:1; } }
+  .card .acts button { border:0; border-radius:999px; background:rgba(255,255,255,.9); padding:6px 10px; font-size:13px; cursor:pointer; }
+
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 20px; border-radius:999px;
+    opacity:0; transition:opacity .3s; pointer-events:none; z-index:20; }
+  .toast.on { opacity:1; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="title">🎉 축하 방명록</h1>
+    <p>축하 메시지를 적고 사진을 함께 남겨주세요</p>
+  </header>
+
+  <main>
+    <section class="composer">
+      <div class="stage">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="shot" alt="찍은 사진 미리보기" hidden>
+        <div class="count" id="count"></div>
+        <div class="flash" id="flash"></div>
+        <div class="camMsg" id="camMsg">
+          <div id="camMsgText">카메라 권한을 허용해 주세요.</div>
+          <button class="btn primary" id="camStart" type="button" style="flex:none">카메라 켜기</button>
+        </div>
+      </div>
+
+      <label for="msg">축하 메시지</label>
+      <textarea id="msg" maxlength="120" placeholder="축하해요! 앞으로도 늘 행복하길 :)"></textarea>
+      <div class="counter"><span id="msgLen">0</span> / 120</div>
+
+      <label for="name">이름</label>
+      <input type="text" id="name" maxlength="20" placeholder="이름 (선택)">
+
+      <div class="row">
+        <button class="btn primary" id="shootBtn" type="button" disabled>📸 사진 찍기</button>
+        <button class="btn" id="retakeBtn" type="button" hidden>다시 찍기</button>
+        <button class="btn primary" id="saveBtn" type="button" hidden>방명록 남기기</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="wallHead">
+        <h2>남겨진 축하 <span id="total">0</span>개</h2>
+        <div class="tools">
+          <button class="small" id="zipBtn" type="button">전체 저장 (zip)</button>
+        </div>
+      </div>
+      <div class="wall" id="wall"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <canvas id="canvas" hidden></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const video = $('video'), shot = $('shot'), countEl = $('count'), flash = $('flash');
+  const msgEl = $('msg'), nameEl = $('name');
+  const shootBtn = $('shootBtn'), retakeBtn = $('retakeBtn'), saveBtn = $('saveBtn');
+  const wall = $('wall');
+
+  let stream = null;
+  let pendingBlob = null;
+  let entries = [];   // { id, name, message, createdAt, photo: Blob, url }
+
+  // ---------- 저장소 (이 브라우저의 IndexedDB) ----------
+  const DB_NAME = 'guestbook', STORE = 'entries';
+  const dbReady = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id' });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  async function tx(mode, fn) {
+    const db = await dbReady;
+    return new Promise((resolve, reject) => {
+      const t = db.transaction(STORE, mode);
+      const r = fn(t.objectStore(STORE));
+      t.oncomplete = () => resolve(r && r.result);
+      t.onerror = () => reject(t.error);
+    });
+  }
+  const dbAll = () => tx('readonly', (s) => s.getAll());
+  const dbPut = (e) => tx('readwrite', (s) => s.put(e));
+  const dbDel = (id) => tx('readwrite', (s) => s.delete(id));
+
+  // ---------- 카메라 ----------
+  function camMsg(text, showBtn) {
+    $('camMsgText').textContent = text;
+    $('camStart').hidden = !showBtn;
+    $('camMsg').hidden = false;
+  }
+  async function startCamera() {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      camMsg('카메라는 https 주소에서만 쓸 수 있어요.', false); return;
+    }
+    camMsg('카메라 연결 중…', false);
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 960 }, facingMode: 'user' }, audio: false });
+    } catch (err) {
+      camMsg(err.name === 'NotAllowedError'
+        ? '카메라 권한이 거부됐어요. 주소창 왼쪽 아이콘에서 카메라를 허용한 뒤 다시 눌러주세요.'
+        : err.name === 'NotFoundError' ? '연결된 카메라를 찾지 못했어요.'
+        : '카메라를 켜지 못했어요 (' + err.name + ')', true);
+      return;
+    }
+    video.srcObject = stream;
+    await video.play().catch(() => {});
+    $('camMsg').hidden = true;
+    shootBtn.disabled = false;
+  }
+  $('camStart').onclick = startCamera;
+
+  // 4:3으로 잘라 거울 모드 그대로 캡처
+  function capture() {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const target = 4 / 3;
+    let sw = vw, sh = vh;
+    if (vw / vh > target) sw = vh * target; else sh = vw / target;
+    const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+    const c = $('canvas');
+    c.width = 1200; c.height = 900;
+    const ctx = c.getContext('2d');
+    ctx.save(); ctx.translate(c.width, 0); ctx.scale(-1, 1);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    ctx.restore();
+    return new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));
+  }
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function shoot() {
+    if (!msgEl.value.trim()) { toast('축하 메시지를 먼저 적어주세요'); msgEl.focus(); return; }
+    shootBtn.disabled = true;
+    for (const n of [3, 2, 1]) { countEl.textContent = n; await sleep(800); }
+    countEl.textContent = '';
+    flash.classList.add('on');
+    requestAnimationFrame(() => requestAnimationFrame(() => flash.classList.remove('on')));
+    pendingBlob = await capture();
+    if (shot.src) URL.revokeObjectURL(shot.src);
+    shot.src = URL.createObjectURL(pendingBlob);
+    shot.hidden = false; video.hidden = true;
+    shootBtn.hidden = true; retakeBtn.hidden = false; saveBtn.hidden = false;
+    saveBtn.focus();
+  }
+  function resetComposer(clearText) {
+    pendingBlob = null;
+    shot.hidden = true; video.hidden = false;
+    shootBtn.hidden = false; shootBtn.disabled = !stream;
+    retakeBtn.hidden = true; saveBtn.hidden = true;
+    if (clearText) { msgEl.value = ''; nameEl.value = ''; updateLen(); }
+  }
+  shootBtn.onclick = shoot;
+  retakeBtn.onclick = () => resetComposer(false);
+
+  saveBtn.onclick = async () => {
+    if (!pendingBlob) return;
+    saveBtn.disabled = true;
+    const entry = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: nameEl.value.trim(),
+      message: msgEl.value.trim(),
+      createdAt: Date.now(),
+      photo: pendingBlob
+    };
+    try {
+      await dbPut(entry);
+    } catch (e) {
+      toast('저장에 실패했어요: ' + e.message); saveBtn.disabled = false; return;
+    }
+    entry.url = URL.createObjectURL(entry.photo);
+    entries.unshift(entry);
+    render(entry.id);
+    resetComposer(true);
+    saveBtn.disabled = false;
+    toast('방명록이 남겨졌어요. 감사합니다! 🎉');
+  };
+
+  const updateLen = () => { $('msgLen').textContent = msgEl.value.length; };
+  msgEl.addEventListener('input', updateLen);
+
+  // ---------- 벽 ----------
+  const fmt = (t) => {
+    const d = new Date(t), p = (n) => String(n).padStart(2, '0');
+    return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  };
+  function render(newId) {
+    $('total').textContent = entries.length;
+    wall.innerHTML = '';
+    if (!entries.length) {
+      wall.innerHTML = '<div class="empty">아직 남겨진 축하가 없어요.<br>첫 번째 축하를 남겨주세요!</div>';
+      return;
+    }
+    for (const e of entries) {
+      const card = document.createElement('article');
+      card.className = 'card' + (e.id === newId ? ' new' : '');
+      card.innerHTML = `<img alt=""><div class="text"></div><div class="meta"><span class="who"></span><span class="when"></span></div>
+        <div class="acts"><button type="button" data-a="dl">저장</button><button type="button" data-a="del">삭제</button></div>`;
+      card.querySelector('img').src = e.url;
+      card.querySelector('.text').textContent = e.message;
+      card.querySelector('.who').textContent = e.name ? '— ' + e.name : '';
+      card.querySelector('.when').textContent = fmt(e.createdAt);
+      card.querySelector('[data-a=dl]').onclick = async () => downloadBlob(await composeCard(e), fileName(e));
+      card.querySelector('[data-a=del]').onclick = async () => {
+        if (!confirm('이 방명록을 삭제할까요?')) return;
+        await dbDel(e.id);
+        URL.revokeObjectURL(e.url);
+        entries = entries.filter((x) => x.id !== e.id);
+        render();
+      };
+      wall.appendChild(card);
+    }
+  }
+
+  // ---------- 저장 (사진 + 메시지를 폴라로이드 한 장으로) ----------
+  function loadImg(url) {
+    return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  }
+  function wrapLines(ctx, text, maxW) {
+    const lines = [];
+    for (const para of text.split('\n')) {
+      let line = '';
+      for (const ch of para) {
+        if (ctx.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; }
+        else line += ch;
+      }
+      lines.push(line);
+    }
+    return lines;
+  }
+  async function composeCard(e) {
+    await document.fonts.load('48px "Nanum Pen Script"').catch(() => {});
+    const img = await loadImg(e.url);
+    const pad = 50, W = 1200 + pad * 2, maxW = W - pad * 2;
+    const c = document.createElement('canvas');
+    const ctx = c.getContext('2d');
+    ctx.font = '64px "Nanum Pen Script", cursive';
+    const lines = wrapLines(ctx, e.message, maxW);
+    const lineH = 72;
+    c.width = W;
+    c.height = pad + 900 + 40 + lines.length * lineH + 90;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, pad, pad, 1200, 900);
+    ctx.fillStyle = '#2b2622'; ctx.font = '64px "Nanum Pen Script", cursive'; ctx.textBaseline = 'top';
+    lines.forEach((l, i) => ctx.fillText(l, pad, pad + 900 + 40 + i * lineH));
+    ctx.font = '32px "Gowun Dodum", sans-serif'; ctx.fillStyle = '#8a7f74';
+    const y = c.height - 60;
+    if (e.name) ctx.fillText('— ' + e.name, pad, y);
+    ctx.textAlign = 'right'; ctx.fillText(new Date(e.createdAt).toLocaleString('ko-KR'), W - pad, y);
+    return new Promise((r) => c.toBlob(r, 'image/jpeg', 0.92));
+  }
+  function fileName(e) {
+    const d = new Date(e.createdAt), p = (n) => String(n).padStart(2, '0');
+    // 파일 이름은 영문/숫자만 (이름과 메시지는 사진 안과 guestbook.txt에 들어가요)
+    return `guestbook_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}_${e.id.slice(-4)}.jpg`;
+  }
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+  $('zipBtn').onclick = async () => {
+    if (!entries.length) { toast('저장할 방명록이 없어요'); return; }
+    if (!window.JSZip) { toast('zip 기능을 불러오지 못했어요. 카드별 "저장"을 이용해 주세요'); return; }
+    toast('zip 파일을 만드는 중…');
+    const zip = new JSZip();
+    const lines = [];
+    for (const e of [...entries].reverse()) {
+      const n = fileName(e);
+      zip.file(n, await composeCard(e));
+      lines.push(`${new Date(e.createdAt).toLocaleString('ko-KR')}\t${e.name}\t${e.message.replace(/\n/g, ' ')}\t${n}`);
+    }
+    zip.file('guestbook.txt', '﻿시간\t이름\t메시지\t사진\n' + lines.join('\n'));
+    downloadBlob(await zip.generateAsync({ type: 'blob' }), 'guestbook.zip');
+  };
+
+  let toastTimer;
+  function toast(t) {
+    const el = $('toast'); el.textContent = t; el.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 2400);
+  }
+
+  // ---------- 시작 ----------
+  (async () => {
+    try {
+      entries = (await dbAll()).sort((a, b) => b.createdAt - a.createdAt);
+      entries.forEach((e) => { e.url = URL.createObjectURL(e.photo); });
+    } catch (e) { toast('저장된 방명록을 불러오지 못했어요'); }
+    render();
+  })();
+  startCamera();
+})();
+</script>
+</body>
+</html>
