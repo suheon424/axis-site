@@ -20,12 +20,12 @@
   header h1 { margin:0; font-size:clamp(28px, 5vw, 44px); letter-spacing:-.5px; }
   header p { margin:6px 0 0; color:var(--muted); }
 
-  main { display:grid; grid-template-columns:minmax(0, 440px) minmax(0, 1fr); gap:28px; max-width:1400px; margin:0 auto; padding:20px 24px 40px; align-items:start; }
-  @media (max-width: 900px) { main { grid-template-columns:1fr; padding:16px; } }
+  main { display:flex; flex-direction:column; gap:32px; max-width:1400px; margin:0 auto; padding:20px 24px 40px; }
+  @media (max-width: 900px) { main { padding:16px; } }
 
-  .composer { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:var(--shadow); position:sticky; top:16px; }
-  @media (max-width: 900px) { .composer { position:static; } }
-  .stage { position:relative; aspect-ratio:4/3; border-radius:14px; overflow:hidden; background:#1b1816; }
+  .composer { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:var(--shadow); }
+  /* 가로로 넓은 16:9 화면, 화면 높이에 맞춰 최대한 크게 */
+  .stage { position:relative; aspect-ratio:16/9; width:min(100%, calc((100vh - 330px) * 16 / 9)); min-width:min(100%, 480px); margin:0 auto; border-radius:14px; overflow:hidden; background:#1b1816; }
   .stage video, .stage img { width:100%; height:100%; object-fit:cover; display:block; }
   .stage video { transform:scaleX(-1); }
   .stage img[hidden], .stage video[hidden] { display:none; }
@@ -41,8 +41,12 @@
   label { display:block; font-size:14px; color:var(--muted); margin:12px 0 6px; }
   input[type=text], textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fffdf9; outline:none; }
   input[type=text]:focus, textarea:focus { border-color:var(--accent); }
-  textarea { resize:vertical; min-height:80px; font-family:"Nanum Pen Script", cursive; font-size:24px; line-height:1.3; }
+  textarea { resize:vertical; min-height:96px; font-family:"Nanum Pen Script", cursive; font-size:24px; line-height:1.3; }
   .counter { text-align:right; font-size:12px; color:var(--muted); margin-top:4px; }
+  .form { display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr); gap:0 16px; max-width:1100px; margin:4px auto 0; }
+  .form .side { display:flex; flex-direction:column; }
+  .form .side .row { margin-top:auto; padding-top:12px; }
+  @media (max-width: 700px) { .form { grid-template-columns:1fr; } }
   .row { display:flex; gap:10px; margin-top:14px; }
   .btn { flex:1; border:0; border-radius:999px; padding:14px 18px; font-size:17px; cursor:pointer; background:#efe7dc; }
   .btn.primary { background:var(--accent); color:var(--accent-ink); font-weight:700; }
@@ -53,7 +57,7 @@
   .wallHead h2 { margin:0; font-size:22px; }
   .wallHead .tools { display:flex; gap:8px; }
   .small { border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:8px 14px; font-size:14px; cursor:pointer; }
-  .wall { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:22px; }
+  .wall { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:24px; }
   .empty { grid-column:1/-1; color:var(--muted); text-align:center; padding:60px 16px; border:2px dashed var(--line); border-radius:20px; }
   .card { background:var(--card); padding:12px 12px 16px; box-shadow:var(--shadow); border-radius:4px; position:relative; transition:transform .2s; }
   .card:nth-child(4n+1) { transform:rotate(-1.5deg); }
@@ -63,7 +67,7 @@
   .card:hover { transform:rotate(0) scale(1.02); z-index:1; }
   .card.new { animation:drop .5s ease-out; }
   @keyframes drop { from { opacity:0; transform:translateY(-20px) scale(.95); } }
-  .card img { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#eee; }
+  .card img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#eee; }
   .card .text { font-family:"Nanum Pen Script", cursive; font-size:24px; line-height:1.2; margin:12px 4px 6px; white-space:pre-wrap; word-break:break-word; }
   .card .meta { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin:0 4px; }
   .card .acts { position:absolute; top:18px; right:18px; display:flex; gap:6px; opacity:0; transition:opacity .2s; }
@@ -95,17 +99,21 @@
         </div>
       </div>
 
-      <label for="msg">축하 메시지</label>
-      <textarea id="msg" maxlength="120" placeholder="축하해요! 앞으로도 늘 행복하길 :)"></textarea>
-      <div class="counter"><span id="msgLen">0</span> / 120</div>
-
-      <label for="name">이름</label>
-      <input type="text" id="name" maxlength="20" placeholder="이름 (선택)">
-
-      <div class="row">
-        <button class="btn primary" id="shootBtn" type="button" disabled>📸 사진 찍기</button>
-        <button class="btn" id="retakeBtn" type="button" hidden>다시 찍기</button>
-        <button class="btn primary" id="saveBtn" type="button" hidden>방명록 남기기</button>
+      <div class="form">
+        <div>
+          <label for="msg">축하 메시지</label>
+          <textarea id="msg" maxlength="120" placeholder="축하해요! 앞으로도 늘 행복하길 :)"></textarea>
+          <div class="counter"><span id="msgLen">0</span> / 120</div>
+        </div>
+        <div class="side">
+          <label for="name">이름</label>
+          <input type="text" id="name" maxlength="20" placeholder="이름 (선택)">
+          <div class="row">
+            <button class="btn primary" id="shootBtn" type="button" disabled>📸 사진 찍기</button>
+            <button class="btn" id="retakeBtn" type="button" hidden>다시 찍기</button>
+            <button class="btn primary" id="saveBtn" type="button" hidden>방명록 남기기</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -169,7 +177,7 @@
     }
     camMsg('카메라 연결 중…', false);
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 960 }, facingMode: 'user' }, audio: false });
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'user' }, audio: false });
     } catch (err) {
       camMsg(err.name === 'NotAllowedError'
         ? '카메라 권한이 거부됐어요. 주소창 왼쪽 아이콘에서 카메라를 허용한 뒤 다시 눌러주세요.'
@@ -184,15 +192,15 @@
   }
   $('camStart').onclick = startCamera;
 
-  // 4:3으로 잘라 거울 모드 그대로 캡처
+  // 16:9로 잘라 거울 모드 그대로 캡처
   function capture() {
     const vw = video.videoWidth, vh = video.videoHeight;
-    const target = 4 / 3;
+    const target = 16 / 9;
     let sw = vw, sh = vh;
     if (vw / vh > target) sw = vh * target; else sh = vw / target;
     const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
     const c = $('canvas');
-    c.width = 1200; c.height = 900;
+    c.width = 1600; c.height = 900;
     const ctx = c.getContext('2d');
     ctx.save(); ctx.translate(c.width, 0); ctx.scale(-1, 1);
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
@@ -303,7 +311,7 @@
   async function composeCard(e) {
     await document.fonts.load('48px "Nanum Pen Script"').catch(() => {});
     const img = await loadImg(e.url);
-    const pad = 50, W = 1200 + pad * 2, maxW = W - pad * 2;
+    const pad = 50, W = 1600 + pad * 2, maxW = W - pad * 2;
     const c = document.createElement('canvas');
     const ctx = c.getContext('2d');
     ctx.font = '64px "Nanum Pen Script", cursive';
@@ -312,7 +320,7 @@
     c.width = W;
     c.height = pad + 900 + 40 + lines.length * lineH + 90;
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.drawImage(img, pad, pad, 1200, 900);
+    ctx.drawImage(img, pad, pad, 1600, 900);
     ctx.fillStyle = '#2b2622'; ctx.font = '64px "Nanum Pen Script", cursive'; ctx.textBaseline = 'top';
     lines.forEach((l, i) => ctx.fillText(l, pad, pad + 900 + 40 + i * lineH));
     ctx.font = '32px "Gowun Dodum", sans-serif'; ctx.fillStyle = '#8a7f74';
