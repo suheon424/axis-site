@@ -303,7 +303,12 @@
   });
   list.addEventListener('click', e => {
     const b = e.target.closest('[data-del]'); if (!b) return;
-    if (!confirm('이 글을 삭제할까요?')) return;
+    // 확인 대화상자 대신 두 번 눌러 삭제해요 (임베드된 화면에서도 동작)
+    if (!b.dataset.armed) {
+      b.dataset.armed = '1'; b.textContent = '한 번 더 누르면 삭제돼요';
+      setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = '이 글만 삭제'; } }, 3000);
+      return;
+    }
     save(load().filter(x => x.id !== b.dataset.del)); render(); toast('이 글만 삭제했어요');
   });
   render();

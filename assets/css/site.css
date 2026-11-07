@@ -479,3 +479,15 @@ body.on-dark .sidenav a { color:#fff; }
   .gb__grid { grid-template-columns:1fr; } .gb-form { position:static; }
   .ix-head { grid-template-columns:1fr; }
 }
+@media (max-width: 700px) {
+  :root { --nav-w: 0px; --gutter: 16px; }
+  .sidenav { display:none; }
+  .hero__title { font-size:44px; }
+  .principles, .comp-grid, .semantic { grid-template-columns:1fr; }
+  .icon-grid, .event-icons { grid-template-columns:repeat(3, 1fr); }
+  .char-grid { grid-template-columns:repeat(4, 1fr); }
+  .radius { grid-template-columns:repeat(3, 1fr); }
+  .spacing { overflow-x:auto; }
+  .type-row p { white-space:normal; }
+  .ix-card { width:82vw; }
+}
