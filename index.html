@@ -3,16 +3,384 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>axis-site</title>
-<style>
-  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
-    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background:#fafafa; color:#111; padding:16px; }
-  a { font-size:18px; padding:14px 24px; border-radius:999px; background:#111; color:#fff; text-decoration:none; }
-</style>
+<title>axis — 오늘의 계획을 axis와 함께</title>
+<meta name="description" content="axis 앱 소개, 디자인 가이드, 인터랙션, 방명록">
+<link rel="icon" href="assets/logo-mark.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
-  <h1>axis-site</h1>
-  <a href="guestbook/">🎉 축하 방명록</a>
-  <a href="camera/" style="background:#666">📷 카메라 테스트</a>
+
+<!-- 상단 로고 (Figma: Group 1, 좌상단 고정) -->
+<header class="logo" aria-label="axis">
+  <a href="#intro" class="logo__link" data-cursor>
+    <svg class="logo__mark" viewBox="0 0 80 80" aria-hidden="true"><path d="M0.04 79.9H23.24L41.25 54.31C43.68 50.85 47.64 48.8 51.87 48.8H79.59V32.38H62.98C60.35 32.38 58.81 29.41 60.33 27.26L79.59 0H56.39L37.44 26.87C35.01 30.32 31.05 32.37 26.83 32.37H0V48.79H15.65C18.28 48.79 19.82 51.75 18.31 53.9L0.04 79.9Z"/></svg>
+    <svg class="logo__word" viewBox="0 0 227 80" aria-hidden="true"><path d="M61.3756 80H18.2764C8.18486 80 0 71.8224 0 61.7236C0 51.6321 8.17762 43.4472 18.2764 43.4472H42.5628C43.8677 43.4472 44.9261 42.3888 44.9261 41.0838C44.9261 36.1903 40.9606 32.232 36.0743 32.232H3.95831V19.7916H43.0992C53.1908 19.7916 61.3756 27.9692 61.3756 38.068V80ZM22.6842 67.8931H42.6715C43.9764 67.8931 45.0349 66.8346 45.0349 65.5297V57.8088C45.0349 56.5038 43.9764 55.4454 42.6715 55.4454H22.6842C19.2478 55.4454 16.464 58.2293 16.464 61.6656C16.464 65.1019 19.2478 67.8858 22.6842 67.8858V67.8931Z"/><path d="M88.462 44.5419L70.2653 19.7916H88.578L99.6482 35.3131C100.583 36.6253 102.534 36.6325 103.476 35.3131L114.604 19.7916H132.75L114.807 44.5492C112.408 47.8623 112.422 52.3498 114.843 55.6484L132.736 79.9927H114.372L103.483 65.0874C102.541 63.7898 100.605 63.8043 99.6699 65.1092L89.0129 80H70.5916L88.4692 55.6991C90.9124 52.3788 90.9124 47.8623 88.4692 44.5492L88.462 44.5419Z"/><path d="M156.03 14.9488L144.083 15.014C142.778 15.014 141.712 13.9701 141.705 12.6652L141.64 0.0869959L158.314 0L158.379 12.5782C158.379 13.8831 157.335 14.9488 156.03 14.956V14.9488ZM158.756 79.913L142.082 80L141.77 22.1912C141.77 20.8863 142.814 19.8206 144.119 19.8133L156.067 19.7481C157.372 19.7481 158.437 20.792 158.445 22.097L158.756 79.9058V79.913Z"/><path d="M185.582 19.7916H223.048V32.348H189.424C186.423 32.348 183.994 34.7766 183.994 37.778C183.994 40.7793 186.423 43.208 189.424 43.208H191.526L208.266 43.2225C218.154 43.2225 226.18 51.2406 226.18 61.1364V62.0861C226.18 71.9746 218.162 80 208.266 80H168.081V68.3425H204.38C207.882 68.3425 210.716 65.5079 210.716 62.0063C210.716 58.5048 207.882 55.6701 204.38 55.6701H185.582C175.671 55.6701 167.646 47.6375 167.646 37.7345C167.646 27.8242 175.679 19.7988 185.582 19.7988V19.7916Z"/></svg>
+  </a>
+</header>
+
+<!-- 우측 내비게이션 (Figma: Frame 307, 우측 고정 탭) -->
+<nav class="sidenav" aria-label="섹션 이동">
+  <ol>
+    <li><a href="#intro" data-nav="intro">소개</a></li>
+    <li><a href="#guide" data-nav="guide">디자인 가이드</a></li>
+    <li><a href="#interaction" data-nav="interaction">인터렉션</a></li>
+    <li><a href="#guestbook" data-nav="guestbook">방명록</a></li>
+  </ol>
+  <span class="sidenav__bar" aria-hidden="true"><i></i></span>
+</nav>
+
+<div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+
+<main>
+
+<!-- ============ 01 소개 ============ -->
+<section id="intro" class="section intro" data-section>
+  <div class="hero">
+    <div class="hero__copy">
+      <p class="eyebrow" data-reveal>01 — axis 앱 소개</p>
+      <h1 class="hero__title">
+        <span class="line"><span data-reveal>오늘의 계획을</span></span>
+        <span class="line"><span data-reveal><em>axis</em>와 함께</span></span>
+      </h1>
+      <p class="hero__lead" data-reveal>계획을 세우고, 진행을 읽고, 변수에 대비해요.<br>axis는 옆에서 계획을 함께 챙겨 주는 친구 같은 플래너예요.</p>
+      <div class="hero__cta" data-reveal>
+        <a class="btn-axis" href="#guide" data-cursor="보기"><span>디자인 가이드 보기</span></a>
+        <a class="btn-sm btn-sm--outline" href="#guestbook" data-cursor>방명록 남기기</a>
+      </div>
+    </div>
+
+    <!-- 앱 화면 목업: 디자인 시스템의 다크 홈 + 탭 바 -->
+    <div class="phone" data-reveal data-tilt>
+      <div class="phone__screen">
+        <div class="phone__status"><span>9:41</span><span class="phone__dots"><i></i><i></i><i></i></span></div>
+        <div class="app-home">
+          <p class="app-home__hello">수현님, 좋은 아침이에요</p>
+          <h3 class="app-home__title">제주 3박 4일 계획</h3>
+          <div class="pace-card">
+            <div class="pace-card__head"><span>진행률</span><b><span data-count="60">0</span>%</b></div>
+            <div class="pace-bar"><i style="--p:60%"></i></div>
+            <p class="pace-card__meta">4일 남음 · 60% 완료</p>
+          </div>
+          <ul class="app-list">
+            <li><span class="dot" style="--c:var(--cat-02)"></span><div><b>성산일출봉 오르기</b><small>07:30 · 도보 20분</small></div><span class="chip chip--done">완료</span></li>
+            <li><span class="dot" style="--c:var(--cat-01)"></span><div><b>해녀의 부엌 점심</b><small>12:00 · 버스 35분</small></div><span class="chip">진행 중</span></li>
+            <li><span class="dot" style="--c:var(--cat-05)"></span><div><b>우도 자전거</b><small>15:00 · Plan B 준비됨</small></div><span class="chip chip--warn">Pace</span></li>
+          </ul>
+        </div>
+        <div class="tabbar tabbar--dark" data-tabbar></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기능 리스트 (plus-ex 프로젝트 리스트처럼 호버 시 미리보기) -->
+  <div class="features">
+    <div class="features__head" data-reveal>
+      <h2>axis가 챙겨 주는 네 가지</h2>
+      <p>기능 이름은 고유명사로 불러요.</p>
+    </div>
+    <ol class="feature-list">
+      <li class="feature" data-reveal data-preview="assets/event/king.png" data-cursor="AI">
+        <span class="feature__no">01</span>
+        <h3 class="feature__name">AI 플래너</h3>
+        <p class="feature__desc">가고 싶은 곳과 하루의 리듬을 말하면, 이동 시간까지 계산한 계획서를 만들어 줘요.</p>
+        <span class="feature__arrow" aria-hidden="true"></span>
+      </li>
+      <li class="feature" data-reveal data-preview="assets/event/attend.png" data-cursor="Pace">
+        <span class="feature__no">02</span>
+        <h3 class="feature__name">Pace</h3>
+        <p class="feature__desc">지금 계획보다 빠른지 느린지 한눈에 보여 줘요. 늦어지면 다음 일정을 살짝 당겨 줘요.</p>
+        <span class="feature__arrow" aria-hidden="true"></span>
+      </li>
+      <li class="feature" data-reveal data-preview="assets/event/affirm.png" data-cursor="Plan B">
+        <span class="feature__no">03</span>
+        <h3 class="feature__name">Plan B</h3>
+        <p class="feature__desc">비가 오거나 문을 닫았을 때 바로 바꿔 탈 수 있는 대체 일정을 미리 준비해 둬요.</p>
+        <span class="feature__arrow" aria-hidden="true"></span>
+      </li>
+      <li class="feature" data-reveal data-preview="assets/event/badge.png" data-cursor="J">
+        <span class="feature__no">04</span>
+        <h3 class="feature__name">J모드</h3>
+        <p class="feature__desc">분 단위로 꼼꼼하게 짜고 싶은 날엔 J모드로. 체크리스트와 알림이 촘촘해져요.</p>
+        <span class="feature__arrow" aria-hidden="true"></span>
+      </li>
+    </ol>
+    <img class="feature-preview" alt="" aria-hidden="true">
+  </div>
+
+  <!-- 캐릭터 마키 -->
+  <div class="marquee" aria-label="axis 캐릭터">
+    <div class="marquee__track" data-marquee></div>
+  </div>
+</section>
+
+<!-- ============ 02 디자인 가이드 ============ -->
+<section id="guide" class="section guide" data-section>
+  <div class="guide__cover">
+    <p class="eyebrow eyebrow--inverse" data-reveal>02 — Design Guide</p>
+    <h2 class="guide__title">
+      <span class="line"><span data-reveal>axis Design System</span></span>
+    </h2>
+    <p class="guide__meta" data-reveal>v1.0 · 2026.11 · Pretendard · iOS 390pt 기준</p>
+    <div class="principles">
+      <article class="principle" data-reveal>
+        <span>01</span><h3>한눈에 읽히게</h3>
+        <p>오늘 할 일과 지금의 진척을 한 화면에서 바로 읽히게 해요. 숫자와 상태는 글보다 먼저 보여요.</p>
+      </article>
+      <article class="principle" data-reveal>
+        <span>02</span><h3>사선은 진행의 축</h3>
+        <p>사선은 ‘진행 중’과 ‘앞으로 나아감’을 뜻해요. 장식이 아니라 상태를 표현할 때만 써요.</p>
+      </article>
+      <article class="principle" data-reveal>
+        <span>03</span><h3>다정하고 짧게</h3>
+        <p>명령보다 제안으로 말해요. 한 문장에 하나의 정보만 담고, 해요체를 써요.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="guide__body">
+    <!-- Color -->
+    <div class="g-block">
+      <div class="g-block__head" data-reveal>
+        <span class="g-no">1.1</span><h3>Color</h3>
+        <p>원색 팔레트는 값만 정의하고, 화면에서는 용도 이름이 붙은 시맨틱 토큰을 써요. 칩을 누르면 HEX 값이 복사돼요.</p>
+      </div>
+      <div class="palette" data-palette></div>
+      <div class="semantic" data-semantic></div>
+    </div>
+
+    <!-- Typography -->
+    <div class="g-block">
+      <div class="g-block__head" data-reveal>
+        <span class="g-no">1.2</span><h3>Typography</h3>
+        <p>Pretendard 하나로 7단계 크기를 써요. 같은 크기에서는 굵기로만 위계를 나눠요. 행간은 제목 130%, 본문 140~150%예요.</p>
+      </div>
+      <div class="type-scale" data-type></div>
+    </div>
+
+    <!-- Spacing / Radius -->
+    <div class="g-block g-block--split">
+      <div>
+        <div class="g-block__head" data-reveal>
+          <span class="g-no">1.3</span><h3>Spacing</h3>
+          <p>간격은 4의 배수로만 써요. 화면 여백 20, 카드 안쪽 16, 섹션 사이 32예요.</p>
+        </div>
+        <div class="spacing" data-spacing></div>
+      </div>
+      <div>
+        <div class="g-block__head" data-reveal>
+          <span class="g-no">&nbsp;</span><h3>Radius</h3>
+          <p>태그 4 · 칩 8 · 카드와 버튼 12 · 시트 20 · 알약과 아바타는 full이에요.</p>
+        </div>
+        <div class="radius" data-radius></div>
+      </div>
+    </div>
+
+    <!-- Components -->
+    <div class="g-block">
+      <div class="g-block__head" data-reveal>
+        <span class="g-no">2</span><h3>Components</h3>
+        <p>주요 버튼 오른쪽 끝의 사선은 axis의 ‘앞으로 나아감’을 뜻해요. 한 화면에 주요 버튼은 하나만 둬요.</p>
+      </div>
+      <div class="comp-grid">
+        <figure class="comp" data-reveal>
+          <div class="comp__stage"><button class="btn-axis btn-axis--wide" type="button"><span>일정에 추가하기</span></button></div>
+          <figcaption>Button · Primary</figcaption>
+        </figure>
+        <figure class="comp" data-reveal>
+          <div class="comp__stage"><button class="btn-axis btn-axis--wide" type="button" disabled><span>일정에 추가하기</span></button></div>
+          <figcaption>Button · Disabled</figcaption>
+        </figure>
+        <figure class="comp" data-reveal>
+          <div class="comp__stage"><div class="btn-pair"><button class="btn-pair__sub" type="button">잘 모르겠어요</button><button class="btn-pair__main" type="button">선택 완료</button></div></div>
+          <figcaption>Button · 2Primary</figcaption>
+        </figure>
+        <figure class="comp" data-reveal>
+          <div class="comp__stage comp__stage--row"><button class="btn-sm" type="button">인기 템플릿 둘러보기</button><button class="btn-sm btn-sm--outline" type="button">다시 시도</button></div>
+          <figcaption>Button/Small · Primary · Outline</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- Icons & Character -->
+    <div class="g-block g-block--split">
+      <div>
+        <div class="g-block__head" data-reveal>
+          <span class="g-no">3.1</span><h3>Icons</h3>
+          <p>24pt 그리드, 1.8pt 직선 라인. 선택된 탭만 채운 아이콘과 브랜드 사선을 써요. 아이콘에 마우스를 올려 보세요.</p>
+        </div>
+        <div class="icon-grid" data-icons></div>
+        <div class="event-icons" data-reveal>
+          <figure><img src="assets/event/attend.png" alt=""><figcaption>출석</figcaption></figure>
+          <figure><img src="assets/event/king.png" alt=""><figcaption>계획왕</figcaption></figure>
+          <figure><img src="assets/event/affirm.png" alt=""><figcaption>확언</figcaption></figure>
+          <figure><img src="assets/event/invite.png" alt=""><figcaption>친구 초대</figcaption></figure>
+          <figure><img src="assets/event/badge.png" alt=""><figcaption>배지</figcaption></figure>
+        </div>
+      </div>
+      <div>
+        <div class="g-block__head" data-reveal>
+          <span class="g-no">3.2</span><h3>Character</h3>
+          <p>프로필에 쓰는 픽셀 캐릭터 12종이에요. 방명록에서 골라 쓸 수 있어요.</p>
+        </div>
+        <div class="char-grid" data-chars></div>
+      </div>
+    </div>
+
+    <!-- Writing -->
+    <div class="g-block">
+      <div class="g-block__head" data-reveal>
+        <span class="g-no">4</span><h3>UX Writing</h3>
+        <p>axis는 옆에서 계획을 함께 챙겨 주는 친구처럼 말해요.</p>
+      </div>
+      <div class="writing" data-writing></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 인터렉션 ============ -->
+<section id="interaction" class="section interaction" data-section>
+  <div class="ix-pin" data-hscroll>
+    <div class="ix-sticky">
+      <div class="ix-head">
+        <p class="eyebrow" data-reveal>03 — Interaction</p>
+        <h2 class="ix-title"><span class="line"><span data-reveal>사선으로 움직여요</span></span></h2>
+        <p class="ix-lead" data-reveal>axis의 인터랙션은 모두 ‘앞으로 나아감’의 사선을 따라가요. 카드 안의 요소를 직접 눌러 보세요.</p>
+        <div class="ix-progress" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="ix-track">
+
+        <article class="ix-card">
+          <span class="ix-card__no">01</span>
+          <h3>Button Press</h3>
+          <p>누르면 사선 조각이 앞으로 밀리며 눌림 색으로 바뀌어요.</p>
+          <div class="ix-card__demo">
+            <button class="btn-axis btn-axis--wide" type="button" data-ripple><span>저장하기</span></button>
+          </div>
+        </article>
+
+        <article class="ix-card">
+          <span class="ix-card__no">02</span>
+          <h3>Segmented Tab</h3>
+          <p>선택된 쪽은 사선으로 잘린 흰 판으로 표시해요. 판이 사선을 유지한 채 미끄러져요.</p>
+          <div class="ix-card__demo">
+            <div class="seg" data-seg role="tablist">
+              <span class="seg__thumb" aria-hidden="true"></span>
+              <button type="button" role="tab" aria-selected="true">계획서</button>
+              <button type="button" role="tab" aria-selected="false">후기</button>
+              <button type="button" role="tab" aria-selected="false">댓글</button>
+            </div>
+            <p class="seg-out" data-seg-out>계획서 3개를 모았어요</p>
+          </div>
+        </article>
+
+        <article class="ix-card">
+          <span class="ix-card__no">03</span>
+          <h3>Tab Bar</h3>
+          <p>선택한 탭만 채운 아이콘과 진한 글자를 써요. 아이콘 속 사선이 브랜드 색으로 켜져요.</p>
+          <div class="ix-card__demo ix-card__demo--phone">
+            <div class="tabbar" data-tabbar></div>
+          </div>
+        </article>
+
+        <article class="ix-card">
+          <span class="ix-card__no">04</span>
+          <h3>Pace</h3>
+          <p>막대를 끌어 진행률을 바꿔 보세요. 숫자는 글보다 먼저, 바로 읽히게 보여 줘요.</p>
+          <div class="ix-card__demo">
+            <div class="pace-demo">
+              <div class="pace-demo__num"><b data-pace-num>60</b>%<small data-pace-msg>4일 남음 · 60% 완료</small></div>
+              <div class="pace-bar pace-bar--light"><i data-pace-fill style="--p:60%"></i></div>
+              <input type="range" min="0" max="100" value="60" data-pace aria-label="진행률">
+            </div>
+          </div>
+        </article>
+
+        <article class="ix-card">
+          <span class="ix-card__no">05</span>
+          <h3>Toast</h3>
+          <p>결과는 짧고 다정하게 알려 줘요. 버튼 이름에는 결과를 담아요.</p>
+          <div class="ix-card__demo ix-card__demo--col">
+            <button class="btn-sm" type="button" data-toast="일정을 담았어요">일정 담기</button>
+            <button class="btn-sm btn-sm--outline" type="button" data-toast="이 일정만 삭제했어요">이 일정만 삭제</button>
+          </div>
+        </article>
+
+        <article class="ix-card">
+          <span class="ix-card__no">06</span>
+          <h3>Toggle &amp; Check</h3>
+          <p>선택된 상태는 항상 brand/primary로 표시해요.</p>
+          <div class="ix-card__demo ix-card__demo--col">
+            <label class="setting"><span>J모드 알림</span><input type="checkbox" class="toggle" checked></label>
+            <label class="setting"><span>Plan B 자동 제안</span><input type="checkbox" class="toggle"></label>
+            <label class="setting"><span>출석 체크</span><input type="checkbox" class="check" checked></label>
+          </div>
+        </article>
+
+        <article class="ix-card ix-card--dark">
+          <span class="ix-card__no">07</span>
+          <h3>Event</h3>
+          <p>미션을 달성하면 3D 아이콘이 튀어 올라요. 아이콘을 눌러 보세요.</p>
+          <div class="ix-card__demo">
+            <div class="event-pop" data-event>
+              <button type="button"><img src="assets/event/attend.png" alt="출석"></button>
+              <button type="button"><img src="assets/event/king.png" alt="계획왕"></button>
+              <button type="button"><img src="assets/event/invite.png" alt="친구 초대"></button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 방명록 ============ -->
+<section id="guestbook" class="section gb" data-section>
+  <div class="gb__head">
+    <p class="eyebrow" data-reveal>04 — Guestbook</p>
+    <h2 class="gb__title"><span class="line"><span data-reveal>한마디 남겨 주세요</span></span></h2>
+    <p class="gb__lead" data-reveal>캐릭터를 고르고 짧게 남겨 주세요. 남긴 글은 이 브라우저에 저장돼요.</p>
+  </div>
+
+  <div class="gb__grid">
+    <form class="gb-form" data-gb-form data-reveal autocomplete="off">
+      <fieldset class="gb-form__chars">
+        <legend>캐릭터</legend>
+        <div class="gb-chars" data-gb-chars></div>
+      </fieldset>
+      <label class="field">
+        <span>이름</span>
+        <input type="text" name="name" maxlength="12" placeholder="이름을 알려 주세요" required>
+      </label>
+      <label class="field">
+        <span>메시지 <em data-gb-count>0/80</em></span>
+        <textarea name="msg" maxlength="80" rows="3" placeholder="axis에게 한마디 남겨 주세요" required></textarea>
+      </label>
+      <button class="btn-axis btn-axis--wide" type="submit"><span>방명록 남기기</span></button>
+      <a class="photo-link" href="guestbook/" data-cursor="📷">
+        <span>사진 방명록으로 가기</span><small>카메라로 사진과 함께 남겨요</small>
+      </a>
+    </form>
+
+    <div class="gb-wall">
+      <div class="gb-wall__head">
+        <h3>남겨진 이야기 <b data-gb-total>0</b></h3>
+      </div>
+      <ul class="gb-list" data-gb-list></ul>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <svg class="footer__mark" viewBox="0 0 80 80" aria-hidden="true"><path d="M0.04 79.9H23.24L41.25 54.31C43.68 50.85 47.64 48.8 51.87 48.8H79.59V32.38H62.98C60.35 32.38 58.81 29.41 60.33 27.26L79.59 0H56.39L37.44 26.87C35.01 30.32 31.05 32.37 26.83 32.37H0V48.79H15.65C18.28 48.79 19.82 51.75 18.31 53.9L0.04 79.9Z"/></svg>
+    <p>오늘의 계획을 axis와 함께 · © 2026 axis</p>
+  </footer>
+</section>
+
+</main>
+
+<div class="toast" role="status" aria-live="polite" data-toast-el></div>
+
+<script src="assets/js/site.js"></script>
 </body>
 </html>
