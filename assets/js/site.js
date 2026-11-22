@@ -76,7 +76,22 @@
     items.forEach(el => el.classList.add('in'));
   }
 
-  /* 상단 큐브: Spline 쪽에서 줌을 꺼 두어서 마우스 회전을 항상 받아요. */
+  /* 상단 큐브: 맨 위에 멈춰 있을 때만 마우스 조작을 받아요.
+     스크롤 중에는 휠이 큐브 확대로 새지 않게 잠시 막아요. */
+  const topCube = $('.s-top .cube iframe');
+  if (topCube) {
+    let lastScroll = 0, tmr;
+    const arm = () => {
+      clearTimeout(tmr);
+      topCube.style.pointerEvents = 'none';
+      if (scrollY > 4) return;
+      tmr = setTimeout(() => { if (scrollY <= 4 && Date.now() - lastScroll >= 700) topCube.style.pointerEvents = 'auto'; }, 720);
+    };
+    const bump = () => { lastScroll = Date.now(); arm(); };
+    addEventListener('scroll', bump, { passive: true });
+    addEventListener('wheel', bump, { passive: true });
+    arm();
+  }
 
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -182,6 +197,31 @@
     const loop = () => { clearInterval(tm); tm = setInterval(() => setLang(!ko), 2200); };
     chips.forEach(c => c.addEventListener('click', () => { setLang(c.dataset.lang === 'ko'); loop(); }));
     loop();
+  }
+
+  /* 나만의 움직임: 글자가 먼저 나왔다 사라지면 휴대폰 영상이 움직여요 */
+  const ix = $('.s-ix'), mov = $('.s-ix .mov');
+  if (ix && mov) {
+    const words = $$('.big', ix);
+    if (reduce || !('IntersectionObserver' in window)) { mov.play().catch(() => {}); }
+    else {
+      ix.classList.add('seq');
+      let run = 0;
+      new IntersectionObserver(es => es.forEach(async e => {
+        const id = ++run;
+        if (!e.isIntersecting) { mov.pause(); mov.currentTime = 0; words.forEach(w => w.classList.remove('on', 'off')); return; }
+        mov.pause(); mov.currentTime = 0;
+        words.forEach(w => w.classList.remove('on', 'off'));
+        await wait(300);
+        for (const w of words) { if (id !== run) return; w.classList.add('on'); await wait(250); }
+        await wait(1300);
+        if (id !== run) return;
+        words.forEach(w => w.classList.add('off'));
+        await wait(550);
+        if (id !== run) return;
+        mov.play().catch(() => {});
+      }), { threshold: .45 }).observe(ix);
+    }
   }
 
   /* 슬래시 버튼: 화면에 보일 때만 반복 재생해요 */
