@@ -191,8 +191,8 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .s-brand .cube { left: 0; top: 300px; width: 1001px; height: 670px; background: #000; overflow: hidden; }
 .s-brand .cube img { width: 1001px; height: 670px; }
 .s-brand .blue { left: 0; top: 970px; width: 1001px; height: 250px; background: var(--blue); overflow: hidden; }
-.s-brand .blue .grid { position: absolute; left: 0; top: -102px; width: 378px; height: 454px; object-fit: cover; background: #0c0c0c; }
-.s-brand .blue .wm { position: absolute; right: 105.57px; top: 50px; width: 410px; height: 150px; }
+.s-brand .blue .grid { position: absolute; left: 0; top: 0; width: 175px; height: 250px; }
+.s-brand .blue .wm { position: absolute; left: 383px; top: 50px; width: 410px; height: 150px; }
 .s-brand .white { left: 1001px; top: 300px; width: 999px; height: 920px; background: #fff; overflow: hidden; }
 .s-brand .white > * { position: absolute; }
 .s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; background: #fff; object-fit: cover; }
@@ -370,8 +370,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 /* 아이콘: 집 아이콘 그려지는 효과 */
 .iconpanel > * { position: absolute; left: 0; top: 0; }
 .iconpanel .dk, .iconpanel .db, .iconpanel .mk, .iconpanel .mb { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
-.iconpanel .stamp .st-in { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.iconpanel .stamp .glow { opacity: 0; }
+.axis-app .ic.pre { opacity: 0; }
 .iconpanel .dg { opacity: 0; }
 .iconpanel .dg[data-i="0"] { opacity: 1; }
 

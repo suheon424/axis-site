@@ -96,11 +96,39 @@
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* 아이콘: 큰 칸에 상단 아이콘 5개를 차례로 그리고, 마지막에 axis 로고를 도장처럼 찍어요 */
+  /* 포지셔닝: axis 앱 아이콘이 도장처럼 찍히고 파랗게 빛나요 */
+  const appIc = $('.axis-app .ic');
+  if (appIc && !reduce && 'IntersectionObserver' in window) {
+    appIc.classList.add('pre');
+    let busy = false;
+    const none = '0 0 0 0 rgba(0,79,237,0)';
+    new IntersectionObserver(es => es.forEach(async e => {
+      if (!e.isIntersecting || busy) return;
+      busy = true;
+      appIc.getAnimations().forEach(a => a.cancel());
+      appIc.classList.add('pre');
+      await wait(1100);
+      appIc.classList.remove('pre');
+      appIc.animate([
+        { opacity: 0, transform: 'scale(2)', boxShadow: none },
+        { opacity: 1, transform: 'scale(.9)', offset: .6, boxShadow: none },
+        { opacity: 1, transform: 'scale(1.04)', offset: .8, boxShadow: none },
+        { opacity: 1, transform: 'scale(1)', boxShadow: none }
+      ], { duration: 480, easing: 'cubic-bezier(.3,0,.2,1)' });
+      await wait(470);
+      await appIc.animate([
+        { boxShadow: none },
+        { boxShadow: '0 0 80px 16px rgba(0,79,237,.95)', offset: .4 },
+        { boxShadow: '0 0 40px 4px rgba(0,79,237,.7)' }
+      ], { duration: 1200, easing: 'ease-out' }).finished;
+      busy = false;
+    }), { threshold: .5 }).observe(appIc);
+  }
+
+  /* 아이콘: 큰 칸에 상단 아이콘 5개를 차례로 그려요 */
   const panel = $('.iconpanel');
   if (panel && !reduce && 'IntersectionObserver' in window) {
     const groups = $$('.dg', panel);
-    const stampIn = $('.stamp .st-in', panel), glow = $('.stamp .glow', panel);
     const run = (els, from, to, ms, delay = 0) => Promise.all(els.map(el =>
       el.animate([{ strokeDashoffset: from }, { strokeDashoffset: to }], { duration: ms, delay, easing: 'cubic-bezier(.6,0,.3,1)', fill: 'forwards' }).finished));
     let seen = false, started = false;
@@ -111,7 +139,7 @@
     async function loop() {
       for (;;) {
         for (const g of groups) {
-          const black = $$('.dk, .mk', g), blue = $$('.db, .mb', g);
+          const black = $$('.dk', g), blue = $$('.db', g);
           g.style.opacity = 1;
           await run(black, 1, 0, 1100);
           await run(blue, 1, 0, 380);
@@ -120,21 +148,6 @@
           g.style.opacity = 0;
           await wait(150);
         }
-        stampIn.animate([
-          { opacity: 0, transform: 'scale(1.9)' },
-          { opacity: 1, transform: 'scale(.92)', offset: .65 },
-          { opacity: 1, transform: 'scale(1.03)', offset: .82 },
-          { opacity: 1, transform: 'scale(1)' }
-        ], { duration: 460, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' });
-        await wait(380);
-        panel.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(0,3px)' }, { transform: 'translate(0,0)' }], { duration: 160 });
-        await glow.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: .75 }], { duration: 900, easing: 'ease-out', fill: 'forwards' }).finished;
-        await wait(1800);
-        await Promise.all([
-          stampIn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }).finished,
-          glow.animate([{ opacity: .75 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }).finished
-        ]);
-        await wait(300);
         while (!seen) await wait(400);
       }
     }
