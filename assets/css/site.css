@@ -399,19 +399,21 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .mbti .o .s { fill: #636B78; transition: fill .25s; }
 .mbti .o.on rect { fill: #EAF1FF; stroke: #004FED; }
 .mbti .o.on .l, .mbti .o.on .s { fill: #004FED; }
-.mbti .go { fill: #A3AAB5; transition: fill .35s; }
-.mbti.done .go { fill: #004FED; }
+.mbti .go { fill: #A3AAB5; }
+.mbti .sweep { transition: none; }
+.mbti.done .sweep { transform: translateX(-175px); transition: transform .32s cubic-bezier(.4,0,.2,1); }
 .login .ph { transform-box: fill-box; transform-origin: 0 0; transition: transform .3s, fill .3s; }
 .login.typing .ph { transform: translate(0, -20px) scale(.8); fill: #8A919C; }
 .login .dots circle { opacity: 0; transition: opacity .12s; }
 .login .dots circle.on { opacity: 1; }
 .login .ln { transition: stroke .3s; }
 .login.typing .ln { stroke: #636C78; }
-.login .cta-b { fill: #DCDFE6; transition: fill .35s; }
-.login .cta-c { fill: #9EA6B8; transition: fill .35s; }
-.login .cta-t { fill: #636C78; transition: fill .35s; }
-.login.done .cta-b { fill: #004FED; }
-.login.done .cta-c { fill: #0036A8; }
+.login .cta-b { fill: #DCDFE6; }
+.login .sweep { transition: none; }
+.login.done .sweep { transform: translateX(-300px); transition: transform .32s cubic-bezier(.4,0,.2,1); }
+.login .cta-c { fill: #9EA6B8; transition: fill .2s .22s; }
+.login .cta-t { fill: #636C78; transition: fill .2s .1s; }
+.login.done .cta-c { fill: #0040B8; }
 .login.done .cta-t { fill: #fff; }
 .seg .k { transition: opacity .35s; }
 .seg .k.b, .seg.alt .k.a { opacity: 0; }
