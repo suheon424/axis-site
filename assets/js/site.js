@@ -19,6 +19,19 @@
     let cur = null;
     for (const s of navSecs) { const r = s.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) { cur = s.dataset.nav; break; } }
     setOn(cur);
+    tone();
+  };
+  /* 배너 아래에 깔린 섹션에 따라 밝은 회색 / 어두운 배경으로 바꿔요 */
+  const fnav = $('.fnav'), fnavBox = $('.fnav nav'), allSecs = $$('.sec');
+  const tone = () => {
+    if (!fnav || !fnavBox) return;
+    const r = fnavBox.getBoundingClientRect(), z = parseFloat(getComputedStyle(fnav).zoom) || 1;
+    /* 브라우저마다 zoom 적용 여부가 달라서, 실제 그려진 폭으로 판단해요 */
+    const k = Math.abs(r.width - fnavBox.offsetWidth * z) < 2 ? 1 : z;
+    const y = (r.top + r.height / 2) * k;
+    let t = '';
+    for (const s of allSecs) { const b = s.getBoundingClientRect(); if (b.top <= y && b.bottom > y) { t = s.dataset.fnav || ''; break; } }
+    fnav.classList.toggle('gray', t === 'gray'); fnav.classList.toggle('dark', t === 'dark');
   };
   addEventListener('scroll', pickActive, { passive: true });
   addEventListener('resize', pickActive);

@@ -43,11 +43,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 /* ───── 플로팅 내비 ───── */
 .fnav { position: fixed; right: 20px; top: 80px; z-index: 50; width: 100px; zoom: var(--z); display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.fnav nav { width: 100px; background: rgba(255,255,255,.72); border-radius: 8px; padding: 8px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.fnav nav { width: 100px; background: rgba(255,255,255,.72); border-radius: 8px; padding: 8px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background-color .3s; }
 .fnav a { display: block; padding: 9px 0; font-size: 15px; font-weight: 500; line-height: 1.3; letter-spacing: -.075px; color: #999; text-decoration: none; white-space: nowrap; transition: color .2s; }
 .fnav a:hover { color: var(--gray7); }
 .fnav a.on { color: var(--blue); font-weight: 700; }
-.fnav .top { width: 50px; height: 50px; border-radius: 50%; background: #000; color: #fff; border: 0; font-size: 13px; font-weight: 700; cursor: pointer; }
+.fnav .top { width: 50px; height: 50px; border-radius: 50%; background: #000; color: #fff; border: 0; font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color .3s; }
 
 /* ───── 1. top ───── */
 .s-top { height: 950px; background: #fff; }
@@ -428,3 +428,8 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .s-ix.seq .big, .s-ix.seq .w1 { opacity: 0; translate: 0 40px; transition: opacity .6s, translate .6s cubic-bezier(.2,.7,.2,1); }
 .s-ix.seq .big.on, .s-ix.seq .w1.on { opacity: 1; translate: 0 0; }
 .s-ix.seq .big.off, .s-ix.seq .w1.off { opacity: 0; translate: 0 -30px; transition: opacity .5s, translate .5s ease-in; }
+
+/* 플로팅 내비: 섹션 배경에 맞춰 색이 바뀌어요 */
+.fnav.gray nav { background: #E9EBF4; }
+.fnav.dark nav { background: #1C1C1C; }
+.fnav.dark .top { background: #202020; }
