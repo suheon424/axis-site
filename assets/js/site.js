@@ -32,10 +32,40 @@
   }));
   $('.fnav .top').addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
 
-  /* 스크롤 등장 */
+  /* 스크롤 등장: 섹션마다 글(라벨·제목·설명)이 먼저, 이어서 콘텐츠가 하나씩 */
+  const SKIP = new Set(['s-top', 's-poster', 's-cam', 's-list', 's-mock']);
+  const TEXT_TAGS = new Set(['P', 'H1', 'H2', 'H3', 'SPAN', 'BUTTON']);
+  const isText = el => el.dataset.g ? el.dataset.g === 't'
+    : (TEXT_TAGS.has(el.tagName) && !el.classList.contains('bubble')) || el.matches('.head, .sc-copy, .sol-mini, .copy');
+  const items = [];
+  $$('.sec').forEach(sec => {
+    if ([...sec.classList].some(c => SKIP.has(c))) return;
+    const pick = parent => [...parent.children].forEach(el => {
+      if (el.hasAttribute('data-norv') || el.classList.contains('lines')) return;
+      if (el.hasAttribute('data-stagger')) return pick(el);
+      el.classList.add('rv'); items.push(el);
+    });
+    pick(sec);
+  });
+  items.forEach((el, i) => { el._rvText = isText(el); el._rvOrder = el.dataset.o ? +el.dataset.o : 100 + i; });
+  const show = list => {
+    list.sort((a, b) => (b._rvText - a._rvText) || a._rvOrder - b._rvOrder);
+    const hasText = list.some(el => el._rvText);
+    let k = 0;
+    list.forEach(el => {
+      const d = el._rvText ? 0 : (hasText ? 450 : 0) + k++ * 160;
+      el.style.transitionDelay = d + 'ms';
+      el.classList.add('in');
+      setTimeout(() => { el.style.transitionDelay = ''; }, d + 800);
+    });
+  };
   if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
-    $$('.rv').forEach(el => io.observe(el));
+    const io = new IntersectionObserver(es => {
+      const hit = es.filter(e => e.isIntersecting).map(e => e.target);
+      hit.forEach(el => io.unobserve(el));
+      if (hit.length) show(hit);
+    }, { rootMargin: '0px 0px -10% 0px' });
+    items.forEach(el => io.observe(el));
     /* 영상은 화면에 보일 때만 재생 */
     const vio = new IntersectionObserver(es => es.forEach(e => {
       const v = e.target;
@@ -43,7 +73,35 @@
     }), { threshold: 0.15 });
     $$('video[autoplay]').forEach(v => { v.removeAttribute('autoplay'); vio.observe(v); });
   } else {
-    $$('.rv').forEach(el => el.classList.add('in'));
+    items.forEach(el => el.classList.add('in'));
+  }
+
+  /* 타이포그래피: English ↔ Korean 번갈아 보여 주기 */
+  const typeSec = $('.s-type');
+  if (typeSec) {
+    const chips = $$('.chip[data-lang]', typeSec);
+    let ko = false, tm;
+    const setLang = v => { ko = v; typeSec.classList.toggle('ko-on', ko); chips.forEach(c => c.classList.toggle('on', (c.dataset.lang === 'ko') === ko)); };
+    const loop = () => { clearInterval(tm); tm = setInterval(() => setLang(!ko), 2200); };
+    chips.forEach(c => c.addEventListener('click', () => { setLang(c.dataset.lang === 'ko'); loop(); }));
+    loop();
+  }
+
+  /* 진행 캘린더: 날짜 칸 상태를 차례로 보여 주기 */
+  const tile = $('.ctile');
+  if (tile) {
+    const cell = $('.cell', tile), num = $('.n', tile), cap = $('.cap', tile);
+    const STATES = [['s5', '2', '진행 중'], ['s3', '9', '완료(100%)'], ['s4', '23', '오늘'], ['s1', '16', '일정 없음'], ['s2', '15', '시작 전 (0%)']];
+    let i = 0;
+    setInterval(() => {
+      tile.classList.add('out');
+      setTimeout(() => {
+        i = (i + 1) % STATES.length;
+        const [c, n, t] = STATES[i];
+        cell.className = 'cell ' + c; num.textContent = n; cap.textContent = t;
+        tile.classList.remove('out');
+      }, 260);
+    }, 1800);
   }
 
   /* ───────── 방명록 ───────── */

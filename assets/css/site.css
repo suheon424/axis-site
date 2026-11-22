@@ -53,8 +53,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-top { height: 950px; background: #fff; }
 .s-top .bg { left: 0; top: 0; width: 2000px; height: 950px; object-fit: cover; }
 .s-top .lines { left: 0; top: 0; pointer-events: none; }
-.s-top .cube { left: 164px; top: -50px; width: 1672px; height: 1050px; overflow: hidden; }
-.s-top .cube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; }
+.s-top .cube { left: 164px; top: -30px; width: 1672px; height: 1050px; overflow: hidden; }
+.s-top .cube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; pointer-events: none; }
 .s-top .logo { left: 80px; top: 80px; width: 299px; height: 79px; z-index: 2; }
 .s-top .t18 { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
 .s-top .t32 { font-size: 32px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
@@ -158,6 +158,13 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-type { height: 929px; background: #fff; }
 .chip { font-size: 14px; padding: 4px 8px; border-radius: 4px; background: #dfdfdf; color: #000; line-height: 1.3; white-space: nowrap; }
 .chip.on { background: var(--blue); color: #fff; }
+button.chip { border: 0; cursor: pointer; transition: background .25s, color .25s; }
+.s-type .en, .s-type .ko { transition: opacity .35s ease; }
+.s-type .gana { width: 520px; height: 146px; }
+.s-type .gana span { position: absolute; left: 0; top: 0; }
+.tbox > .en, .tbox > .ko { position: absolute; inset: 0; }
+.tbox > div > p { position: absolute; white-space: nowrap; }
+.s-type.ko-on .en, .s-type:not(.ko-on) .ko { opacity: 0; }
 .s-type .pt { font-size: 28px; font-weight: 500; color: #000; white-space: nowrap; line-height: 1.3; }
 .s-type .wts { font-size: 16px; color: var(--muted); white-space: nowrap; line-height: 1.3; }
 .s-type .gana { font-size: 132.409px; line-height: 1.1; letter-spacing: -2.65px; white-space: nowrap; color: #000; }
@@ -191,7 +198,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; }
 .s-brand .gpt { left: 523px; top: 541px; width: 100px; height: 100px; border-radius: 24px; overflow: hidden; }
 .s-brand .gpt img { width: 100%; height: 100%; }
-.s-brand .copy { left: 130px; top: 757px; width: 465px; }
+.s-brand .copy { left: 130px; top: 700px; width: 465px; }
 .s-brand .copy p.t { margin-top: 20px; font-size: 17px; line-height: 1.6; color: #000; white-space: nowrap; }
 
 /* ───── 3-d. iconography ───── */
@@ -346,7 +353,34 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-outro footer b { font-size: 16px; font-weight: 500; color: #fff; }
 
 /* 스크롤 등장 */
-.rv { opacity: 0; translate: 0 30px; transition: opacity .8s ease, translate .8s ease; }
-.rv.in { opacity: 1; translate: 0 0; }
-@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; translate: none; transition: none; } .strip { animation: none; transform: translateX(-2261px); } }
+.rv { opacity: 0; translate: 0 30px; }
+.rv.in { opacity: 1; translate: 0 0; transition: opacity .7s ease, translate .7s ease; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; translate: none; transition: none; } .iconpanel .dk, .iconpanel .db { animation: none !important; stroke-dashoffset: 0 !important; } .strip { animation: none; transform: translateX(-2261px); } }
 .s-problem > :not(.hand) { z-index: 1; }
+
+/* 아이콘: 집 아이콘 그려지는 효과 */
+.iconpanel > * { position: absolute; left: 0; top: 0; }
+.iconpanel .dk, .iconpanel .db { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.iconpanel.in .dk { animation: drawK 6s cubic-bezier(.6,0,.3,1) .5s infinite; }
+.iconpanel.in .db { animation: drawB 6s cubic-bezier(.6,0,.3,1) .5s infinite; }
+@keyframes drawK { 0% { stroke-dashoffset: 1; } 32% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; } 94%, 100% { stroke-dashoffset: -1; } }
+@keyframes drawB { 0%, 30% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 74% { stroke-dashoffset: 0; } 84%, 100% { stroke-dashoffset: -1; } }
+
+/* 달성 큐브 (Spline, 상단 큐브와 같은 구도를 축소) */
+.calcard .ccube { left: -209px; top: 62px; width: 1672px; height: 1050px; transform: scale(.64); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.calcard .ccube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; }
+
+/* 진행 캘린더 상태 타일 */
+.ctile { width: 200px; height: 200px; border-radius: 32px; background: #000; }
+.ctile > * { position: absolute; }
+.ctile .cell { left: 55.3px; top: 40.3px; width: 88.9px; height: 88.9px; border-radius: 13.3px; background: #fff; overflow: hidden; transition: opacity .25s; }
+.ctile .cell::before { content: ''; position: absolute; inset: 0; background: var(--blue); opacity: 0; }
+.ctile .cell::after { content: ''; position: absolute; inset: 0; border-radius: 13.3px; border: 2.2px solid var(--blue); opacity: 0; }
+.ctile .n { position: absolute; left: 11px; top: 14px; font-size: 31px; font-weight: 600; line-height: 1; color: #c2c6d1; z-index: 1; }
+.ctile .cap { left: 0; top: 146px; width: 200px; text-align: center; font-size: 17px; letter-spacing: -.17px; color: #fff; transition: opacity .25s; }
+.ctile.out .cell, .ctile.out .cap { opacity: 0; }
+.ctile .cell.s2::after, .ctile .cell.s5::after { opacity: 1; }
+.ctile .cell.s3::before { opacity: 1; }
+.ctile .cell.s3 .n, .ctile .cell.s5 .n { color: #fff; }
+.ctile .cell.s4 .n { color: var(--blue); }
+.ctile .cell.s5::before { opacity: 1; clip-path: polygon(0 0, 92% 0, 24% 100%, 0 100%); }
