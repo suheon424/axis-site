@@ -195,7 +195,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .s-brand .blue .wm { position: absolute; right: 105.57px; top: 50px; width: 410px; height: 150px; }
 .s-brand .white { left: 1001px; top: 300px; width: 999px; height: 920px; background: #fff; overflow: hidden; }
 .s-brand .white > * { position: absolute; }
-.s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; background: #fff; object-fit: cover; clip-path: inset(3px 0 0 0); }
+.s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; background: #fff; object-fit: cover; clip-path: inset(5px 0 0 0); }
 .s-brand .gpt { left: 523px; top: 541px; width: 100px; height: 100px; border-radius: 24px; overflow: hidden; }
 .s-brand .gpt img { width: 100%; height: 100%; }
 .s-brand .copy { left: 130px; top: 743px; width: 465px; }
@@ -401,7 +401,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .mbti .o.on .l, .mbti .o.on .s { fill: #004FED; }
 .mbti .go { fill: #A3AAB5; }
 .mbti .sweep { transition: none; }
-.mbti.done .sweep { transform: translateX(-175px); transition: transform .32s cubic-bezier(.4,0,.2,1); }
+.mbti.done .sweep { transform: translateX(-218px); transition: transform .2s cubic-bezier(.3,0,.3,1); }
 .login .ph { transform-box: fill-box; transform-origin: 0 0; transition: transform .3s, fill .3s; }
 .login.typing .ph { transform: translate(0, -20px) scale(.8); fill: #8A919C; }
 .login .dots circle { opacity: 0; transition: opacity .12s; }
@@ -410,7 +410,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .login.typing .ln { stroke: #636C78; }
 .login .cta-b { fill: #DCDFE6; }
 .login .sweep { transition: none; }
-.login.done .sweep { transform: translateX(-300px); transition: transform .32s cubic-bezier(.4,0,.2,1); }
+.login.done .sweep { transform: translateX(-300px); transition: transform .22s cubic-bezier(.3,0,.3,1); }
 .login .cta-c { fill: #9EA6B8; transition: fill .2s .22s; }
 .login .cta-t { fill: #636C78; transition: fill .2s .1s; }
 .login.done .cta-c { fill: #0040B8; }
