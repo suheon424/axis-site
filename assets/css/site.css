@@ -149,7 +149,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-ds .p { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,.8); white-space: nowrap; }
 .s-ds .e { font-size: 14px; color: rgba(255,255,255,.45); white-space: nowrap; }
 .principles { left: 1130px; top: 357px; width: 470px; border-radius: 8px; overflow: hidden; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-.principles div { display: flex; gap: 40px; padding: 24px; background: rgba(255,255,255,.16); border-bottom: 1px solid #000; }
+.principles div { display: flex; align-items: center; gap: 40px; padding: 24px; background: rgba(255,255,255,.16); border-bottom: 1px solid #000; }
 .principles div:last-child { border-bottom: 0; }
 .principles b { width: 129px; flex: none; font-size: 20px; font-weight: 700; line-height: 28.6px; color: #fff; white-space: nowrap; }
 .principles p { font-size: 14px; line-height: 1.7; color: #b4bac6; white-space: nowrap; }
@@ -261,11 +261,17 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .co-dot { top: 10px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 2px rgba(0,79,237,.18); }
 
 /* ───── 6. poster ───── */
-.s-poster { height: 1000px; background: #000; }
-.strip { left: 0; top: 285px; display: flex; gap: 24px; width: max-content; animation: flow 120s linear infinite; }
-.strip img { width: 242px; height: 347px; object-fit: cover; flex: none; background: #111; }
-@keyframes flow { from { transform: translateX(-2261px); } to { transform: translateX(calc(-2261px - 7967px)); } }
-.s-poster .main { left: 750px; top: 141.5px; width: 500px; height: 717px; object-fit: cover; box-shadow: 0 4px 20px rgba(0,0,0,.25); background: #222; }
+.s-poster { height: 907px; background: #000; }
+.s-poster .label { color: var(--blue); }
+.s-poster .pdesc { width: 330px; font-size: 17px; line-height: 1.6; letter-spacing: -.17px; color: #fff; white-space: nowrap; }
+.pwin { top: 328px; width: 674px; height: 284.1px; overflow: hidden; }
+.pwin::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,.5); pointer-events: none; }
+.ptrack { position: absolute; left: 0; top: 0; display: flex; gap: 40px; width: max-content; transition: transform .9s cubic-bezier(.65,0,.35,1); }
+.ptrack.jump { transition: none; }
+.ptrack img { width: 198.04px; height: 284.1px; object-fit: cover; flex: none; background: #111; }
+.pmain { left: 765.1px; top: 133px; width: 469.8px; height: 674px; background: #111; }
+.pmain img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s ease; }
+.pmain img.on { opacity: 1; }
 
 /* ───── 7. guestbook ───── */
 .s-cam { height: 1271px; background: #fff; }
@@ -358,19 +364,19 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 /* 스크롤 등장 */
 .rv { opacity: 0; translate: 0 30px; }
 .rv.in { opacity: 1; translate: 0 0; transition: opacity .7s ease, translate .7s ease; }
-@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; translate: none; transition: none; } .iconpanel .dk, .iconpanel .db { animation: none !important; stroke-dashoffset: 0 !important; } .strip { animation: none; transform: translateX(-2261px); } }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; translate: none; transition: none; } .iconpanel .dk, .iconpanel .db { stroke-dashoffset: 0 !important; } }
 .s-problem > :not(.hand) { z-index: 1; }
 
 /* 아이콘: 집 아이콘 그려지는 효과 */
 .iconpanel > * { position: absolute; left: 0; top: 0; }
-.iconpanel .dk, .iconpanel .db { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
-.iconpanel.in .dk { animation: drawK 6s cubic-bezier(.6,0,.3,1) .5s infinite; }
-.iconpanel.in .db { animation: drawB 6s cubic-bezier(.6,0,.3,1) .5s infinite; }
-@keyframes drawK { 0% { stroke-dashoffset: 1; } 32% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; } 94%, 100% { stroke-dashoffset: -1; } }
-@keyframes drawB { 0%, 30% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 74% { stroke-dashoffset: 0; } 84%, 100% { stroke-dashoffset: -1; } }
+.iconpanel .dk, .iconpanel .db, .iconpanel .mk, .iconpanel .mb { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.iconpanel .stamp .st-in { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.iconpanel .stamp .glow { opacity: 0; }
+.iconpanel .dg { opacity: 0; }
+.iconpanel .dg[data-i="0"] { opacity: 1; }
 
 /* 달성 큐브 (Spline, 상단 큐브와 같은 구도를 축소) */
-.calcard .ccube { left: -50px; top: 294px; width: 1672px; height: 1050px; transform: scale(.41); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.calcard .ccube { left: -35px; top: 238px; width: 1672px; height: 1050px; transform: scale(.41); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
 .calcard .ccube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; }
 
 /* 진행 캘린더 상태 타일 */

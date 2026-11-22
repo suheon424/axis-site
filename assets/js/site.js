@@ -93,6 +93,88 @@
     arm();
   }
 
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 아이콘: 큰 칸에 상단 아이콘 5개를 차례로 그리고, 마지막에 axis 로고를 도장처럼 찍어요 */
+  const panel = $('.iconpanel');
+  if (panel && !reduce && 'IntersectionObserver' in window) {
+    const groups = $$('.dg', panel);
+    const stampIn = $('.stamp .st-in', panel), glow = $('.stamp .glow', panel);
+    const run = (els, from, to, ms, delay = 0) => Promise.all(els.map(el =>
+      el.animate([{ strokeDashoffset: from }, { strokeDashoffset: to }], { duration: ms, delay, easing: 'cubic-bezier(.6,0,.3,1)', fill: 'forwards' }).finished));
+    let seen = false, started = false;
+    new IntersectionObserver(es => es.forEach(e => {
+      seen = e.isIntersecting;
+      if (seen && !started) { started = true; loop(); }
+    }), { threshold: .3 }).observe(panel);
+    async function loop() {
+      for (;;) {
+        for (const g of groups) {
+          const black = $$('.dk, .mk', g), blue = $$('.db, .mb', g);
+          g.style.opacity = 1;
+          await run(black, 1, 0, 1100);
+          await run(blue, 1, 0, 380);
+          await wait(900);
+          await Promise.all([run(blue, 0, -1, 380), run(black, 0, -1, 620, 120)]);
+          g.style.opacity = 0;
+          await wait(150);
+        }
+        stampIn.animate([
+          { opacity: 0, transform: 'scale(1.9)' },
+          { opacity: 1, transform: 'scale(.92)', offset: .65 },
+          { opacity: 1, transform: 'scale(1.03)', offset: .82 },
+          { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 460, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' });
+        await wait(380);
+        panel.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(0,3px)' }, { transform: 'translate(0,0)' }], { duration: 160 });
+        await glow.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: .75 }], { duration: 900, easing: 'ease-out', fill: 'forwards' }).finished;
+        await wait(1800);
+        await Promise.all([
+          stampIn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }).finished,
+          glow.animate([{ opacity: .75 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }).finished
+        ]);
+        await wait(300);
+        while (!seen) await wait(400);
+      }
+    }
+  }
+
+  /* 포스터: 가운데 큰 포스터가 1일부터 30일까지 차례로 바뀌고, 양옆 줄도 함께 넘어가요 */
+  const pmain = $('.pmain');
+  if (pmain) {
+    const tracks = $$('.s-poster .ptrack');
+    const imgs = $$('img', pmain);
+    const STEP = 238.036, N = 30;
+    let cur = 0, front = 0;
+    const place = (jump) => {
+      tracks.forEach((t, k) => {
+        t.classList.toggle('jump', !!jump);
+        const first = k === 0 ? N + cur - 3 : N + cur + 1;
+        t.style.transform = `translateX(${-first * STEP}px)`;
+      });
+    };
+    const showMain = () => {
+      const next = imgs[1 - front];
+      const n = (cur % N) + 1;
+      next.src = `assets/img/poster-l-${String(n).padStart(2, '0')}.jpg`;
+      next.alt = `axis 포스터 ${n}일`;
+      const swap = () => { next.classList.add('on'); imgs[front].classList.remove('on'); imgs[front].alt = ''; front = 1 - front; };
+      if (next.complete && next.naturalWidth) swap(); else next.onload = swap;
+    };
+    place(true);
+    if (!reduce) {
+      let vis = false;
+      if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; }), { threshold: .2 }).observe(pmain);
+      setInterval(() => {
+        if (!vis) return;
+        cur += 1;
+        place(false); showMain();
+        if (cur >= N) setTimeout(() => { cur = 0; place(true); }, 1000);
+      }, 2400);
+    }
+  }
+
   /* 타이포그래피: English ↔ Korean 번갈아 보여 주기 */
   const typeSec = $('.s-type');
   if (typeSec) {
@@ -159,7 +241,6 @@
   camBox.addEventListener('click', startCam);
   camBox.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startCam(); } });
 
-  const wait = ms => new Promise(r => setTimeout(r, ms));
   shutter.addEventListener('click', async () => {
     if (busy) return;
     if (!(await startCam())) return;
