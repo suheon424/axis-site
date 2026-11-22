@@ -152,7 +152,7 @@
     camCount.hidden = true;
     const w = 960, h = Math.round(w * (video.videoHeight || 9) / (video.videoWidth || 16));
     const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const ctx = c.getContext('2d'); ctx.translate(w, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, w, h);
+    const ctx = c.getContext('2d'); ctx.filter = 'grayscale(1)'; ctx.translate(w, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, w, h);
     flash.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => flash.classList.remove('on')));
     photo = c.toDataURL('image/jpeg', 0.72);
     noPhoto.checked = false;

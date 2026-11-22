@@ -191,11 +191,11 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .s-brand .cube { left: 0; top: 300px; width: 1001px; height: 670px; background: #000; overflow: hidden; }
 .s-brand .cube img { width: 1001px; height: 670px; }
 .s-brand .blue { left: 0; top: 970px; width: 1001px; height: 250px; background: var(--blue); overflow: hidden; }
-.s-brand .blue .grid { position: absolute; left: 0; top: 0; width: 379px; height: 250px; }
+.s-brand .blue .grid { position: absolute; left: 0; top: -102px; width: 378px; height: 454px; object-fit: cover; background: #0c0c0c; }
 .s-brand .blue .wm { position: absolute; right: 105.57px; top: 50px; width: 410px; height: 150px; }
 .s-brand .white { left: 1001px; top: 300px; width: 999px; height: 920px; background: #fff; overflow: hidden; }
 .s-brand .white > * { position: absolute; }
-.s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; }
+.s-brand .weave { left: -38px; top: 86px; width: 804px; height: 603px; mix-blend-mode: multiply; background: #fff; object-fit: cover; }
 .s-brand .gpt { left: 523px; top: 541px; width: 100px; height: 100px; border-radius: 24px; overflow: hidden; }
 .s-brand .gpt img { width: 100%; height: 100%; }
 .s-brand .copy { left: 130px; top: 700px; width: 465px; }
@@ -216,7 +216,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 
 /* ───── 3-g. interaction ───── */
 .s-ix { height: 674px; background: #fbfafb; }
-.s-ix .mov { left: 400px; top: 0; width: 1200px; height: 674px; }
+.s-ix .mov { left: 400px; top: 0; width: 1200px; height: 674px; object-fit: cover; background: #fff; }
 .s-ix .big { top: 265px; transform: translateX(-50%); font-size: 120px; font-weight: 800; letter-spacing: -2px; line-height: 1.2; white-space: nowrap; }
 .s-trans { height: 798px; background: #1c1c1c; }
 .s-trans video { object-fit: cover; }
@@ -271,7 +271,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .s-cam .wall img { width: 100%; height: 100%; object-fit: cover; object-position: bottom; }
 .s-cam .wall::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 60.87%, #fff 100%); }
 .cam-box { left: 430px; top: 160px; width: 1141px; height: 445px; background: #2c2c2c; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.cam-box video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.cam-box video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1); }
 .cam-box .msg { position: relative; font-size: 30px; font-weight: 700; line-height: 1.4; color: #fff; text-align: center; }
 .cam-box .msg small { display: block; font-size: 15px; font-weight: 400; color: rgba(255,255,255,.6); margin-top: 6px; }
 .cam-box .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity .3s; }
@@ -287,7 +287,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .pv-lb { font-size: 13px; font-weight: 600; color: #636c78; white-space: nowrap; }
 .preview { left: 400px; top: 896px; width: 360px; height: 203px; border: 1px dashed #c5cbd6; border-radius: 12px; background: rgba(255,255,255,.7); overflow: hidden; }
 .preview .empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; line-height: 1.4; color: var(--muted); }
-.preview img.shot-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.preview img.shot-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); }
 .preview .retake { position: absolute; right: 10px; bottom: 10px; padding: 6px 10px; border-radius: 6px; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; cursor: pointer; }
 .fld { left: 800px; width: 800px; }
 .fld .lb { height: 28px; padding-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; line-height: 19.5px; font-weight: 600; color: #636c78; letter-spacing: -.16px; }
@@ -328,7 +328,8 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .board .c-nm { width: 150px; text-align: center; font-size: 14px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
 .board .c-dt { width: 150px; text-align: center; font-size: 14px; color: var(--muted); white-space: nowrap; }
 .board .thumb { width: 64px; height: 64px; border-radius: 8px; background: var(--bg-gray); overflow: hidden; display: grid; place-items: center; }
-.board .thumb img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+.board .thumb img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; filter: grayscale(1); }
+.board .thumb img.ic { filter: none; }
 .board .thumb img.ic { width: 22px; height: 22px; cursor: default; }
 .board .del { flex: none; border: 0; background: none; color: #b8bec8; font-size: 12px; cursor: pointer; padding: 4px 6px; }
 .board .del.arm { color: #e00000; }
@@ -339,7 +340,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .pager button:disabled { opacity: .35; cursor: default; }
 .lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.8); display: none; align-items: center; justify-content: center; cursor: zoom-out; }
 .lightbox.on { display: flex; }
-.lightbox img { max-width: 80vw; max-height: 80vh; border-radius: 8px; }
+.lightbox img { max-width: 80vw; max-height: 80vh; border-radius: 8px; filter: grayscale(1); }
 
 /* ───── 8. outro ───── */
 .s-outro { height: 499px; background: #0a0c10; }
