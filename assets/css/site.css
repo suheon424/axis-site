@@ -367,7 +367,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 @keyframes drawB { 0%, 30% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 74% { stroke-dashoffset: 0; } 84%, 100% { stroke-dashoffset: -1; } }
 
 /* 달성 큐브 (Spline, 상단 큐브와 같은 구도를 축소) */
-.calcard .ccube { left: -209px; top: 62px; width: 1672px; height: 1050px; transform: scale(.64); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.calcard .ccube { left: -133px; top: 177px; width: 1672px; height: 1050px; transform: scale(.52); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
 .calcard .ccube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; }
 
 /* 진행 캘린더 상태 타일 */
