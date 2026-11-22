@@ -184,6 +184,35 @@
     loop();
   }
 
+  /* 슬래시 버튼: 화면에 보일 때만 반복 재생해요 */
+  const onScreen = (el, fn) => {
+    let seen = false, running = false;
+    new IntersectionObserver(es => es.forEach(e => {
+      seen = e.isIntersecting;
+      if (seen && !running) { running = true; (async () => { while (seen) await fn(); running = false; })(); }
+    }), { threshold: .3 }).observe(el);
+  };
+  const mbti = $('.mbti'), login = $('.login');
+  if (mbti && !reduce) onScreen(mbti, async () => {
+    const opts = $$('.o', mbti);
+    opts.forEach(o => o.classList.remove('on')); mbti.classList.remove('done');
+    await wait(900);
+    for (const k of [0, 3, 5, 6]) { opts[k].classList.add('on'); await wait(650); }
+    mbti.classList.add('done');
+    await wait(2200);
+  });
+  if (login && !reduce) onScreen(login, async () => {
+    const dots = $$('.dots circle', login);
+    dots.forEach(d => d.classList.remove('on')); login.classList.remove('typing', 'done');
+    await wait(1000);
+    login.classList.add('typing'); await wait(350);
+    for (const d of dots) { d.classList.add('on'); await wait(260); }
+    await wait(250);
+    login.classList.add('done');
+    await wait(2400);
+  });
+  if (!reduce) $$('.seg').forEach((s, i) => onScreen(s, async () => { await wait(1800 + i * 300); s.classList.toggle('alt'); }));
+
   /* 진행 캘린더: 날짜 칸 상태를 차례로 보여 주기 */
   const tile = $('.ctile');
   if (tile) {
