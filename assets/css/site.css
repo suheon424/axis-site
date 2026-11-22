@@ -433,3 +433,5 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .fnav.gray nav { background: #E9EBF4; }
 .fnav.dark nav { background: #1C1C1C; }
 .fnav.dark .top { background: #202020; }
+.fnav .top { transition: background-color .3s, opacity .3s, visibility .3s; }
+.fnav.attop .top { opacity: 0; visibility: hidden; pointer-events: none; }

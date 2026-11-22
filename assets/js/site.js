@@ -29,9 +29,13 @@
     /* 브라우저마다 zoom 적용 여부가 달라서, 실제 그려진 폭으로 판단해요 */
     const k = Math.abs(r.width - fnavBox.offsetWidth * z) < 2 ? 1 : z;
     const y = (r.top + r.height / 2) * k;
-    let t = '';
-    for (const s of allSecs) { const b = s.getBoundingClientRect(); if (b.top <= y && b.bottom > y) { t = s.dataset.fnav || ''; break; } }
+    let sec = null;
+    for (const s of allSecs) { const b = s.getBoundingClientRect(); if (b.top <= y && b.bottom > y) { sec = s; break; } }
+    const atTop = !!sec && sec.classList.contains('s-top');
+    /* top 화면만 흰 배너 + TOP 버튼 숨김, 어두운 섹션은 어둡게, 나머지는 모두 밝은 회색 */
+    const t = atTop ? '' : (sec && sec.dataset.fnav === 'dark' ? 'dark' : 'gray');
     fnav.classList.toggle('gray', t === 'gray'); fnav.classList.toggle('dark', t === 'dark');
+    fnav.classList.toggle('attop', atTop);
   };
   addEventListener('scroll', pickActive, { passive: true });
   addEventListener('resize', pickActive);
