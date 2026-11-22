@@ -274,26 +274,26 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .pmain img.on { opacity: 1; }
 
 /* ───── 7. guestbook ───── */
-.s-cam { height: 1271px; background: #fff; }
+.s-cam { height: 1305px; background: #fff; }
 .s-cam .wall { left: 0; top: 0; width: 2000px; height: 1173px; }
 .s-cam .wall img { width: 100%; height: 100%; object-fit: cover; object-position: bottom; }
-.s-cam .wall::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 60.87%, #fff 100%); }
-.cam-box { left: 440px; top: 170px; width: 1121px; height: 425px; background: #2c2c2c; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.s-cam .wall::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 66.709%, #fff 100%); }
+.cam-box { left: 440px; top: 170px; width: 1120px; height: 490px; background: #2c2c2c; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .cam-box video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1); }
 .cam-box .msg { position: relative; font-size: 30px; font-weight: 700; line-height: 1.4; color: #fff; text-align: center; }
 .cam-box .msg small { display: block; font-size: 15px; font-weight: 400; color: rgba(255,255,255,.6); margin-top: 6px; }
 .cam-box .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity .3s; }
 .cam-box .flash.on { opacity: .85; transition: none; }
 .cam-box .count { position: absolute; font-size: 120px; font-weight: 800; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,.4); }
-.shutter { left: 961px; top: 585px; width: 80px; height: 83px; border: 0; background: none; cursor: pointer; filter: drop-shadow(0 4px 14px rgba(0,0,0,.18)); transition: transform .15s; z-index: 2; }
+.shutter { left: 961px; top: 640px; width: 80px; height: 83px; border: 0; background: none; cursor: pointer; filter: drop-shadow(0 4px 14px rgba(0,0,0,.18)); transition: transform .15s; z-index: 2; }
 .shutter:hover { transform: scale(1.05); }
 .shutter:active { transform: scale(.95); }
 .step { font-size: 12px; font-weight: 600; color: var(--blue); letter-spacing: .96px; white-space: nowrap; }
 .step-t { font-size: 20px; font-weight: 700; color: var(--ink); white-space: nowrap; }
 .opt { font-size: 14px; color: var(--muted); white-space: nowrap; }
-.divider { left: 400px; top: 844px; width: 1200px; height: 1px; background: rgba(17,18,20,.12); }
+.divider { left: 400px; top: 914px; width: 1200px; height: 1px; background: rgba(17,18,20,.12); }
 .pv-lb { font-size: 13px; font-weight: 600; color: #636c78; white-space: nowrap; }
-.preview { left: 400px; top: 896px; width: 360px; height: 203px; border: 1px dashed #c5cbd6; border-radius: 12px; background: rgba(255,255,255,.7); overflow: hidden; }
+.preview { left: 400px; top: 966px; width: 360px; height: 203px; border: 1px dashed #c5cbd6; border-radius: 12px; background: rgba(255,255,255,.7); overflow: hidden; }
 .preview .empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; line-height: 1.4; color: var(--muted); }
 .preview img.shot-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); }
 .preview .retake { position: absolute; right: 10px; bottom: 10px; padding: 6px 10px; border-radius: 6px; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; cursor: pointer; }
@@ -305,18 +305,18 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .fld textarea { height: 104px; line-height: 22.5px; }
 .fld input::placeholder, .fld textarea::placeholder { color: #a3aab5; }
 .fld input:focus, .fld textarea:focus { border-color: var(--blue); }
-.nophoto { left: 400px; top: 1127px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer; user-select: none; }
+.nophoto { left: 400px; top: 1197px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer; user-select: none; }
 .nophoto input { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 1.5px solid #b8bec8; border-radius: 4px; background: #fff; margin: 0; cursor: pointer; display: grid; place-items: center; }
 .nophoto input:checked { background: #0057ed; border-color: #0057ed; }
 .nophoto input:checked::after { content: ''; width: 6px; height: 11px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
-.note13 { left: 400px; top: 1155px; font-size: 13px; color: var(--muted); white-space: nowrap; }
-.submit { left: 1250px; top: 1123px; width: 350px; height: 52px; border: 0; background: none; cursor: pointer; padding: 0; }
+.note13 { left: 400px; top: 1225px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.submit { left: 1250px; top: 1193px; width: 350px; height: 52px; border: 0; background: none; cursor: pointer; padding: 0; }
 .submit svg { display: block; }
 .submit .body { fill: #000; transition: fill .2s; }
 .submit:disabled { cursor: default; }
 .submit:disabled .body { fill: #c4c9d3; }
 .submit:disabled .corner { fill: #e1e4ea; }
-.toast { left: 1250px; top: 1185px; font-size: 13px; color: var(--blue); white-space: nowrap; }
+.toast { left: 1250px; top: 1255px; font-size: 13px; color: var(--blue); white-space: nowrap; }
 
 .s-list { height: 1122px; background: #fff; }
 .s-list .ttl { font-size: 40px; font-weight: 800; color: var(--ink); white-space: nowrap; line-height: 1.2; }
