@@ -199,27 +199,39 @@
     loop();
   }
 
-  /* 나만의 움직임: 글자가 먼저 나왔다 사라지면 휴대폰 영상이 움직여요 */
+  /* 나만의 움직임: 설명 → 나만의 → 움직임 순으로 나오고, 셋이 함께 사라지면
+     휴대폰 영상이 한 번 재생돼요. 이 흐름을 계속 반복해요. */
   const ix = $('.s-ix'), mov = $('.s-ix .mov');
   if (ix && mov) {
-    const words = $$('.big', ix);
-    if (reduce || !('IntersectionObserver' in window)) { mov.play().catch(() => {}); }
+    const words = [$('.w1', ix), $('.w2', ix), $('.w3', ix)].filter(Boolean);
+    if (reduce || !('IntersectionObserver' in window)) { mov.loop = true; mov.play().catch(() => {}); }
     else {
       ix.classList.add('seq');
       let run = 0;
-      new IntersectionObserver(es => es.forEach(async e => {
+      const ended = () => new Promise(r => {
+        const done = () => { mov.removeEventListener('ended', done); r(); };
+        mov.addEventListener('ended', done);
+      });
+      const reset = () => { mov.pause(); try { mov.currentTime = 0; } catch (_) {} words.forEach(w => w.classList.remove('on', 'off')); };
+      const loop = async id => {
+        while (id === run) {
+          reset();
+          await wait(400);
+          for (const w of words) { if (id !== run) return; w.classList.add('on'); await wait(700); }
+          await wait(900);
+          if (id !== run) return;
+          words.forEach(w => w.classList.add('off'));
+          await wait(550);
+          if (id !== run) return;
+          const end = ended();
+          mov.play().catch(() => {});
+          await end;
+        }
+      };
+      new IntersectionObserver(es => es.forEach(e => {
         const id = ++run;
-        if (!e.isIntersecting) { mov.pause(); mov.currentTime = 0; words.forEach(w => w.classList.remove('on', 'off')); return; }
-        mov.pause(); mov.currentTime = 0;
-        words.forEach(w => w.classList.remove('on', 'off'));
-        await wait(300);
-        for (const w of words) { if (id !== run) return; w.classList.add('on'); await wait(250); }
-        await wait(1300);
-        if (id !== run) return;
-        words.forEach(w => w.classList.add('off'));
-        await wait(550);
-        if (id !== run) return;
-        mov.play().catch(() => {});
+        if (!e.isIntersecting) { reset(); return; }
+        loop(id);
       }), { threshold: .45 }).observe(ix);
     }
   }
