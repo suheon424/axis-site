@@ -300,18 +300,23 @@
   }
 
   /* ───────── 방명록 ───────── */
-  const KEY = 'axis-guestbook-v2';
+  const KEY = 'axis-guestbook-v3', OLD = 'axis-guestbook-v2';
   const SEED = [
     { id: 's24', name: '김하늘', msg: '졸업 전시 축하해요! 큐브에서 시작한 로고 이야기가 정말 인상적이었어요.', photo: '', date: '2026.11.21', seed: true },
     { id: 's23', name: '이준호', msg: '계획이 틀어져도 다시 맞추면 된다는 말이 오늘 제일 큰 위로가 됐어요.', photo: '', date: '2026.11.21', seed: true },
-    { id: 's22', name: '박서연', msg: 'AI 재조정 기능 꼭 출시해 주세요. 내일부터 바로 쓰고 싶어요!', photo: '', date: '2026.11.21', seed: true },
-    { id: 's21', name: '최민재', msg: '하단바 큐브 모션이 너무 귀여워요. 계속 눌러 보게 되네요 :)', photo: '', date: '2026.11.20', seed: true },
-    { id: 's20', name: '정유나', msg: 'J가 되고 싶은 P로서 진심으로 응원합니다. 템플릿 아카이브 기대돼요.', photo: '', date: '2026.11.20', seed: true },
-    { id: 's19', name: '한지우', msg: '영상부터 목업까지 완성도가 높아요. 그동안 고생 많으셨어요!', photo: '', date: '2026.11.20', seed: true },
   ];
-  const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : null; } catch { return null; } };
+  const read = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : null; } catch { return null; } };
+  const load = () => read(KEY);
   const save = arr => { try { localStorage.setItem(KEY, JSON.stringify(arr)); return true; } catch { return false; } };
-  let entries = load() || SEED.slice();
+  /* 예전 버전에 저장된 글이 있으면, 예시 글만 빼고 방문자가 남긴 글은 옮겨 와요 */
+  const migrate = () => {
+    const old = read(OLD); if (!old) return null;
+    const mine = old.filter(e => !e.seed);
+    const arr = [...mine, ...SEED]; save(arr);
+    try { localStorage.removeItem(OLD); } catch {}
+    return arr;
+  };
+  let entries = load() || migrate() || SEED.slice();
 
   const camBox = $('#camBox'), video = $('#camVideo'), camMsg = $('#camMsg'), camCount = $('#camCount'), flash = $('#camFlash');
   const shutter = $('#shutter'), preview = $('#preview'), pvEmpty = $('#pvEmpty');
@@ -420,6 +425,10 @@
     for (let n = start; n <= Math.min(pages, start + 3); n++) p += `<button type="button" data-pg="${n}" class="${n === page ? 'on' : ''}">${n}</button>`;
     p += `<button type="button" data-pg="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="다음">›</button>`;
     pager.innerHTML = p;
+    /* 글 수에 맞춰 번호를 목록 바로 아래에 두고, 섹션 높이도 맞춰요 (피그마: 목록 아래 48px, 번호 아래 100px) */
+    const pt = board.offsetTop + board.offsetHeight + 48;
+    pager.style.top = pt + 'px';
+    pager.closest('.sec').style.height = (pt + 36 + 100) + 'px';
   }
   pager.addEventListener('click', e => { const b = e.target.closest('[data-pg]'); if (b && !b.disabled) { page = +b.dataset.pg; render(); } });
   filterEl.addEventListener('change', () => { page = 1; render(); });
