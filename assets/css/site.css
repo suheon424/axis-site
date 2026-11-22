@@ -213,6 +213,8 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .medals { left: 400px; top: 310px; display: flex; gap: 22px; }
 .medals img { width: 70px; height: 70px; }
 .s-badge .reward { left: 1363px; top: 120px; width: 237.5px; height: 260px; }
+.s-badge .reward img { position: absolute; left: 0; top: 0; width: 237.5px; height: 260px; }
+.s-badge .reward img.bdg { left: 34.4px; top: 0; width: 168.4px; height: 148.5px; }
 
 /* ───── 3-g. interaction ───── */
 .s-ix { height: 674px; background: #fbfafb; }
@@ -368,7 +370,7 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 @keyframes drawB { 0%, 30% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 74% { stroke-dashoffset: 0; } 84%, 100% { stroke-dashoffset: -1; } }
 
 /* 달성 큐브 (Spline, 상단 큐브와 같은 구도를 축소) */
-.calcard .ccube { left: -133px; top: 177px; width: 1672px; height: 1050px; transform: scale(.52); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.calcard .ccube { left: -50px; top: 294px; width: 1672px; height: 1050px; transform: scale(.41); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
 .calcard .ccube iframe { position: absolute; left: -80px; top: -80px; width: calc(100% + 160px); height: calc(100% + 160px); border: 0; background: transparent; }
 
 /* 진행 캘린더 상태 타일 */

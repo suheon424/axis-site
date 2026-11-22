@@ -76,6 +76,23 @@
     items.forEach(el => el.classList.add('in'));
   }
 
+  /* 상단 큐브: 맨 위에 멈춰 있을 때만 마우스 조작을 받아요.
+     스크롤 중에는 휠이 큐브 확대로 새지 않게 잠시 막아요. */
+  const topCube = $('.s-top .cube iframe');
+  if (topCube) {
+    let lastScroll = 0, tmr;
+    const arm = () => {
+      clearTimeout(tmr);
+      topCube.style.pointerEvents = 'none';
+      if (scrollY > 4) return;
+      tmr = setTimeout(() => { if (scrollY <= 4 && Date.now() - lastScroll >= 700) topCube.style.pointerEvents = 'auto'; }, 720);
+    };
+    const bump = () => { lastScroll = Date.now(); arm(); };
+    addEventListener('scroll', bump, { passive: true });
+    addEventListener('wheel', bump, { passive: true });
+    arm();
+  }
+
   /* 타이포그래피: English ↔ Korean 번갈아 보여 주기 */
   const typeSec = $('.s-type');
   if (typeSec) {
