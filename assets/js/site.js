@@ -326,8 +326,8 @@
   /* ───────── 방명록 ───────── */
   const KEY = 'axis-guestbook-v3', OLD = 'axis-guestbook-v2';
   const SEED = [
-    { id: 's24', name: '김하늘', msg: '졸업 전시 축하해요! 큐브에서 시작한 로고 이야기가 정말 인상적이었어요.', photo: '', date: '2026.11.21', seed: true },
-    { id: 's23', name: '이준호', msg: '계획이 틀어져도 다시 맞추면 된다는 말이 오늘 제일 큰 위로가 됐어요.', photo: '', date: '2026.11.21', seed: true },
+    { id: 's24', name: '익명', msg: '졸업 전시 축하해요! 큐브에서 시작한 로고 이야기가 정말 인상적이었어요.', photo: '', date: '2026.11.21', seed: true },
+    { id: 's23', name: '익명', msg: '계획이 틀어져도 다시 맞추면 된다는 말이 오늘 제일 큰 위로가 됐어요.', photo: '', date: '2026.11.21', seed: true },
   ];
   const read = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : null; } catch { return null; } };
   const load = () => read(KEY);
@@ -340,7 +340,7 @@
     try { localStorage.removeItem(OLD); } catch {}
     return arr;
   };
-  let entries = load() || migrate() || SEED.slice();
+  let entries = (load() || migrate() || SEED.slice()).map(e => e.seed ? (SEED.find(s => s.id === e.id) || e) : e);
 
   const camBox = $('#camBox'), video = $('#camVideo'), camMsg = $('#camMsg'), camCount = $('#camCount'), flash = $('#camFlash');
   const shutter = $('#shutter'), preview = $('#preview'), pvEmpty = $('#pvEmpty');
