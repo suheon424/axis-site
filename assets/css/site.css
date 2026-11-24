@@ -58,9 +58,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-top .logo { left: 80px; top: 80px; width: 299px; height: 79px; z-index: 2; }
 .s-top .t18 { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
 .s-top .mouse { left: 987px; top: 1050px; width: 26px; height: 42px; border: 1px solid #999; border-radius: 100px; z-index: 2; }
-.s-top .mouse i { position: absolute; left: 50%; top: 8px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #999; animation: wheel 1.6s cubic-bezier(.45,0,.55,1) infinite; }
-@keyframes wheel { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 55% { transform: translateY(12px); opacity: 1; } 80%, 100% { transform: translateY(16px); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .s-top .mouse i { animation: none; } }
+.s-top .mouse svg { position: absolute; left: 9px; top: 8px; width: 6px; height: 6px; display: block; animation: wheel 1.6s cubic-bezier(.45,0,.55,1) infinite; will-change: transform; }
+@keyframes wheel { 0%, 15% { transform: translateY(0); } 60%, 75% { transform: translateY(14px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .s-top .mouse svg { animation: none; } }
 .s-top .t32 { font-size: 32px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
 
 /* ───── 2-a. case ───── */
@@ -266,8 +266,13 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 
 /* ───── 6. poster ───── */
 .s-poster { height: 907px; background: #000; }
-.s-poster .label { color: var(--blue); }
-.s-poster .pdesc { width: 330px; font-size: 17px; line-height: 1.6; letter-spacing: -.17px; color: #fff; white-space: nowrap; }
+.s-poster .label { color: #a0d5ff; }
+.s-poster { touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
+.s-poster.drag { cursor: grabbing; }
+.s-poster img { -webkit-user-drag: none; }
+.s-poster .plegend { font-size: 14px; line-height: 1.8; letter-spacing: -.14px; color: #adadad; white-space: nowrap; }
+.s-poster .plegend b { font-weight: 700; }
+.s-poster .pdesc { width: 330px; overflow: visible; font-size: 17px; line-height: 1.6; letter-spacing: -.17px; color: #fff; white-space: nowrap; }
 .pwin { top: 328px; width: 674px; height: 284.1px; overflow: hidden; }
 .pwin::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,.5); pointer-events: none; }
 .ptrack { position: absolute; left: 0; top: 0; display: flex; gap: 40px; width: max-content; transition: transform .9s cubic-bezier(.65,0,.35,1); }

@@ -196,12 +196,36 @@
     if (!reduce) {
       let vis = false;
       if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; }), { threshold: .2 }).observe(pmain);
-      setInterval(() => {
-        if (!vis) return;
-        cur += 1;
+      let tm, busy = false;
+      const go = d => {
+        if (busy) return; busy = true; setTimeout(() => { busy = false; }, 450);
+        if (d < 0 && cur <= 0) { cur = N; place(true); void tracks[0].offsetWidth; }
+        cur += d;
         place(false); showMain();
-        if (cur >= N) setTimeout(() => { cur = 0; place(true); }, 1000);
-      }, 2400);
+        if (cur >= N) setTimeout(() => { if (cur >= N) { cur -= N; place(true); } }, 1000);
+      };
+      const auto = () => { clearInterval(tm); tm = setInterval(() => { if (vis) go(1); }, 2400); };
+      auto();
+      /* 스와이프(드래그)나 트랙패드 가로 스크롤로 포스터를 직접 넘길 수 있어요 */
+      const sec = $('.s-poster');
+      let sx = null, sy = 0;
+      sec.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; sec.classList.add('drag'); });
+      const end = e => {
+        sec.classList.remove('drag');
+        if (sx === null) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { go(dx < 0 ? 1 : -1); auto(); }
+      };
+      sec.addEventListener('pointerup', end);
+      sec.addEventListener('pointercancel', () => { sx = null; sec.classList.remove('drag'); });
+      sec.addEventListener('dragstart', e => e.preventDefault());
+      let wx = 0, wt;
+      sec.addEventListener('wheel', e => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        e.preventDefault();
+        wx += e.deltaX; clearTimeout(wt); wt = setTimeout(() => { wx = 0; }, 200);
+        if (Math.abs(wx) > 60) { go(wx > 0 ? 1 : -1); wx = 0; auto(); }
+      }, { passive: false });
     }
   }
 
