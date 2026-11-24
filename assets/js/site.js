@@ -372,7 +372,7 @@
 
   function validate() {
     countEl.textContent = `${msgEl.value.length}/80`;
-    submit.disabled = !(nameEl.value.trim() && msgEl.value.trim() && (photo || noPhoto.checked));
+    submit.disabled = !(msgEl.value.trim() && (photo || noPhoto.checked));
   }
   [nameEl, msgEl].forEach(el => el.addEventListener('input', validate));
   noPhoto.addEventListener('change', () => { if (noPhoto.checked && photo) { photo = ''; showPreview(); } validate(); });
@@ -384,7 +384,7 @@
   $('#gbForm').addEventListener('submit', e => {
     e.preventDefault();
     if (submit.disabled) return;
-    const item = { id: 'u' + Date.now(), name: nameEl.value.trim(), msg: msgEl.value.trim(), photo, date: today(), mine: true };
+    const item = { id: 'u' + Date.now(), name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo, date: today(), mine: true };
     const next = [item, ...entries];
     if (!save(next)) {
       // 저장 공간이 부족하면 사진을 더 작게 줄여서 다시 시도

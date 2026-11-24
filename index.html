@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="assets/css/site.css?v=11221822">
+<link rel="stylesheet" href="assets/css/site.css?v=11240051">
 <script>(function(){var s=function(){document.documentElement.style.setProperty('--z',document.documentElement.clientWidth/2000)};s();addEventListener('resize',s)})();</script>
 </head>
 <body>
@@ -30,12 +30,13 @@
   <!-- 1. TOP -->
   <section class="sec s-top" id="top">
     <img class="bg" src="assets/img/top-bg.jpg" alt="">
-    <svg class="lines" width="2000" height="950" viewBox="0 0 2000 950" fill="none" aria-hidden="true"><path d="M0 450.5H2000" stroke="#1f2027" stroke-opacity=".8"/><path d="M1387 -46L613 945" stroke="#1f2027" stroke-opacity=".8"/></svg>
+    <svg class="lines" width="2000" height="1140" viewBox="0 0 2000 1140" fill="none" aria-hidden="true"><path d="M0 570.5H2000" stroke="#1f2027" stroke-opacity=".8"/><path d="M1484 -50L516 1190" stroke="#1f2027" stroke-opacity=".8"/></svg>
     <div class="cube"><iframe src="https://my.spline.design/rubikscube-wBhd62GkxSstXn6KlWX70GHD/" title="axis 큐브" loading="eager" allow="autoplay; fullscreen"></iframe></div>
     <img class="logo" src="assets/svg/logo.svg" alt="axis">
-    <p class="t18" style="left:80px;top:816px">© 2026</p>
-    <p class="t18" style="left:1131px;top:793px">DESIGNER<br>HWANG SUHYUN</p>
-    <p class="t32" style="left:1467px;top:713px">AXIS<br>PLANNER APP CONCEPT<br>UI/UX DESIGN</p>
+    <p class="t18" style="left:80px;top:977px">© 2026</p>
+    <p class="t18" style="left:1131px;top:954px">DESIGNER<br>HWANG SUHYUN</p>
+    <p class="t32" style="left:1467px;top:874px">AXIS<br>PLANNER APP CONCEPT<br>UI/UX DESIGN</p>
+    <a class="mouse" href="#plan" aria-label="아래로 스크롤"><i></i></a>
   </section>
 
   <!-- 2. 기획 -->
@@ -475,19 +476,19 @@
       <div class="flash" id="camFlash"></div>
     </div>
     <button class="shutter" id="shutter" type="button" aria-label="사진 찍기"><img src="assets/svg/shutter.svg" alt="" width="80" height="83"></button>
-    <p class="step" style="left:400px;top:850px">STEP 01</p>
-    <p class="step-t" style="left:400px;top:872px">사진 남기기</p>
-    <p class="opt" style="left:500px;top:877px">*선택</p>
-    <p class="step" style="left:800px;top:850px">STEP 02</p>
-    <p class="step-t" style="left:800px;top:872px">글 남기기</p>
+    <p class="step" style="left:400px;top:874px">STEP 01</p>
+    <p class="step-t" style="left:400px;top:896px">사진 남기기</p>
+    <p class="opt" style="left:500px;top:901px">*선택</p>
+    <p class="step" style="left:800px;top:874px">STEP 02</p>
+    <p class="step-t" style="left:800px;top:896px">글 남기기</p>
     <div class="divider"></div>
-    <p class="pv-lb" style="left:400px;top:940px">미리보기</p>
+    <p class="pv-lb" style="left:400px;top:964px">미리보기</p>
     <div class="preview" id="preview">
       <div class="empty" id="pvEmpty"><img src="assets/svg/camera.svg" alt="" width="28" height="28">촬영한 사진이 여기에 보여요</div>
     </div>
     <form id="gbForm" autocomplete="off" style="left:0;top:0">
-      <label class="fld" style="position:absolute;top:938px"><span class="lb">이름</span><input id="gbName" maxlength="20" placeholder="이름을 알려 주세요"></label>
-      <label class="fld" style="position:absolute;top:1037px"><span class="lb">메시지<em id="gbCount">0/80</em></span><textarea id="gbMsg" maxlength="80" placeholder="자유롭게 작성해 주세요"></textarea></label>
+      <label class="fld" style="position:absolute;top:962px"><span class="lb"><span>이름<i class="o">*선택</i></span></span><input id="gbName" maxlength="20" placeholder="이름을 알려 주세요"></label>
+      <label class="fld" style="position:absolute;top:1061px"><span class="lb">메시지<em id="gbCount">0/80</em></span><textarea id="gbMsg" maxlength="80" placeholder="자유롭게 작성해 주세요"></textarea></label>
       <label class="nophoto" style="position:absolute"><input type="checkbox" id="gbNoPhoto">사진 없이 등록할게요</label>
       <p class="note13" style="position:absolute">사진은 선택이에요. 찍지 않아도 글만 남길 수 있어요.</p>
       <button class="submit" id="gbSubmit" type="submit" style="position:absolute" disabled><svg width="350" height="52" viewBox="0 0 350 52" fill="none" xmlns="http://www.w3.org/2000/svg"><clipPath id="submitClip"><rect width="350" height="52" rx="8"/></clipPath><g clip-path="url(#submitClip)"><path class="body" d="M8 0H343L312 52H8C2.66667 52 0 49.3333 0 44V8C0 2.66667 2.66667 0 8 0Z" fill="black"/><path class="corner" d="M350 0V44C350 49.3333 347.333 52 342 52H319L350 0Z" fill="#575757"/></g><text x="175" y="31.69" text-anchor="middle" fill="white" font-size="16" font-weight="600" letter-spacing="-0.02em">방명록 남기기</text></svg></button>
@@ -523,6 +524,6 @@
 </main>
 
 <div class="lightbox" id="lightbox"><img alt=""></div>
-<script src="assets/js/site.js?v=11221822"></script>
+<script src="assets/js/site.js?v=11240051"></script>
 </body>
 </html>
