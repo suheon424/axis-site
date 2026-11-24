@@ -424,7 +424,7 @@
   /* 목록 */
   const board = $('#board'), pager = $('#pager'), totalEl = $('#gbTotal'), filterEl = $('#gbFilter'), lb = $('#lightbox');
   const PER = 6;
-  let page = 1, armed = null;
+  let page = 1;
   const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function render() {
@@ -440,8 +440,7 @@
       const no = list.length - ((page - 1) * PER + i);
       const ph = e.photo ? `<div class="thumb"><img src="${e.photo}" alt="${esc(e.name)}님의 사진" data-zoom></div>` : '–';
       const tag = e.photo ? '' : '<span class="tag">글만</span>';
-      const del = e.mine ? `<button class="del" type="button" data-del="${e.id}">${armed === e.id ? '정말 삭제' : '삭제'}</button>` : '';
-      html += `<div class="row"><div class="c-no">${no}</div><div class="c-ph">${ph}</div><div class="c-tx">${tag}<p title="${esc(e.msg)}">${esc(e.msg)}</p>${del}</div><div class="c-nm">${esc(e.name)}</div><div class="c-dt">${e.date}</div></div>`;
+      html += `<div class="row"><div class="c-no">${no}</div><div class="c-ph">${ph}</div><div class="c-tx">${tag}<p title="${esc(e.msg)}">${esc(e.msg)}</p></div><div class="c-nm">${esc(e.name)}</div><div class="c-dt">${e.date}</div></div>`;
     });
     board.innerHTML = html;
     let p = `<button type="button" data-pg="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="이전">‹</button>`;
@@ -457,12 +456,6 @@
   pager.addEventListener('click', e => { const b = e.target.closest('[data-pg]'); if (b && !b.disabled) { page = +b.dataset.pg; render(); } });
   filterEl.addEventListener('change', () => { page = 1; render(); });
   board.addEventListener('click', e => {
-    const d = e.target.closest('[data-del]');
-    if (d) {
-      const id = d.dataset.del;
-      if (armed !== id) { armed = id; render(); setTimeout(() => { if (armed === id) { armed = null; render(); } }, 3000); return; }
-      entries = entries.filter(x => x.id !== id); armed = null; save(entries); render(); return;
-    }
     const z = e.target.closest('[data-zoom]');
     if (z) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
   });
