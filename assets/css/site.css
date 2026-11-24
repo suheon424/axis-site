@@ -59,7 +59,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .s-top .t18 { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
 .s-top .mouse { left: 987px; top: 1050px; width: 26px; height: 42px; border: 1px solid #999; border-radius: 100px; z-index: 2; }
 .s-top .mouse svg { position: absolute; left: 9px; top: 8px; width: 6px; height: 6px; display: block; animation: wheel 1.6s cubic-bezier(.45,0,.55,1) infinite; will-change: transform; }
-@keyframes wheel { 0%, 15% { transform: translateY(0); } 60%, 75% { transform: translateY(14px); } 100% { transform: translateY(0); } }
+@keyframes wheel { 0% { transform: translateY(0); opacity: 0; } 15% { transform: translateY(0); opacity: 1; } 65% { transform: translateY(14px); opacity: 1; } 85%, 100% { transform: translateY(14px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .s-top .mouse svg { animation: none; } }
 .s-top .t32 { font-size: 32px; font-weight: 700; line-height: 1.3; color: var(--gray7); white-space: nowrap; z-index: 2; pointer-events: none; }
 
