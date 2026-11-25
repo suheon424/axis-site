@@ -338,7 +338,8 @@
     return r.status === 204 ? null : r.json().catch(() => null);
   });
   const fmtDate = iso => { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
-  const toEntry = r => ({ id: r.id, name: r.name || '익명', msg: r.msg, photo: r.photo_url || '', date: fmtDate(r.created_at), mine: !!mine[r.id] });
+  const postedAt = {}; // 이 브라우저에서 방금 올린 글의 올린 시각
+  const toEntry = r => ({ id: r.id, name: r.name || '익명', msg: r.msg, photo: r.photo_url || '', date: fmtDate(r.created_at), at: postedAt[r.id] || Date.parse(r.created_at) || 0, mine: !!mine[r.id] });
   let entries = getJSON(CACHE, []).map(toEntry);
   let loading = false;
   async function refresh() {
@@ -465,7 +466,8 @@
       await api('/rest/v1/guestbook', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
         body: JSON.stringify({ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo_url, owner_token: token }) });
       mine[id] = token; setJSON(MINE, mine);
-      entries = [{ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo: photo_url || '', date: today(), mine: true }, ...entries];
+      postedAt[id] = Date.now();
+      entries = [{ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo: photo_url || '', date: today(), at: postedAt[id], mine: true }, ...entries];
       say('방명록이 등록됐어요. 고마워요!');
       nameEl.value = ''; msgEl.value = ''; photo = ''; noPhoto.checked = false; showPreview();
       page = 1; render();
@@ -483,6 +485,9 @@
   let page = 1, armed = null;
   const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  /* 올린 지 3분 안의 사진은 누구나 크게 볼 수 있고, 그 뒤로는 잠겨요 (?unlock 으로 푼 브라우저는 항상 볼 수 있어요) */
+  const FRESH = 3 * 60 * 1000;
+  let freshT;
   function render() {
     const f = filterEl.value;
     const list = entries.filter(e => f === 'all' || (f === 'photo' ? e.photo : !e.photo));
@@ -494,12 +499,16 @@
     if (!rows.length) html += '<div class="none">아직 남겨진 이야기가 없어요.</div>';
     rows.forEach((e, i) => {
       const no = list.length - ((page - 1) * PER + i);
-      const ph = e.photo ? `<div class="thumb"><img src="${e.photo}" alt="${esc(e.name)}님의 사진" data-zoom></div>` : '–';
+      const fresh = Date.now() - e.at < FRESH;
+      const ph = e.photo ? `<div class="thumb"><img src="${e.photo}" alt="${esc(e.name)}님의 사진" data-zoom data-at="${e.at}"${fresh ? ' class="fresh"' : ''}></div>` : '–';
       const tag = e.photo ? '' : '<span class="tag">글만</span>';
       const del = e.mine ? `<button class="del" type="button" data-del="${e.id}">${armed === e.id ? '정말 삭제' : '삭제'}</button>` : '';
       html += `<div class="row"><div class="c-no">${no}</div><div class="c-ph">${ph}</div><div class="c-tx">${tag}<p title="${esc(e.msg)}">${esc(e.msg)}</p>${del}</div><div class="c-nm">${esc(e.name)}</div><div class="c-dt">${e.date}</div></div>`;
     });
     board.innerHTML = html;
+    clearTimeout(freshT);
+    const next = Math.min(...entries.map(e => e.at + FRESH).filter(t => t > Date.now()));
+    if (isFinite(next)) freshT = setTimeout(render, next - Date.now() + 50);
     let p = `<button type="button" data-pg="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="이전">‹</button>`;
     const start = Math.max(1, Math.min(page - 1, pages - 3));
     for (let n = start; n <= Math.min(pages, start + 3); n++) p += `<button type="button" data-pg="${n}" class="${n === page ? 'on' : ''}">${n}</button>`;
@@ -528,7 +537,7 @@
       return;
     }
     const z = e.target.closest('[data-zoom]');
-    if (z && zoomOn) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
+    if (z && (zoomOn || Date.now() - +z.dataset.at < FRESH)) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
   });
   lb.addEventListener('click', () => lb.classList.remove('on'));
   addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
