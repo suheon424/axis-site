@@ -485,8 +485,8 @@
   let page = 1, armed = null;
   const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  /* 올린 지 1분 안의 사진은 누구나 크게 볼 수 있고, 그 뒤로는 잠겨요 (?unlock 으로 푼 브라우저는 항상 볼 수 있어요) */
-  const FRESH = 60 * 1000;
+  /* 올린 지 3분 안의 사진은 누구나 크게 볼 수 있고, 그 뒤로는 잠겨요 (?unlock 으로 푼 브라우저는 항상 볼 수 있어요) */
+  const FRESH = 3 * 60 * 1000;
   let freshT;
   function render() {
     const f = filterEl.value;
