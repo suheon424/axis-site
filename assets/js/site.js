@@ -385,7 +385,8 @@
     camCount.hidden = true;
     const w = 960, h = Math.round(w * (video.videoHeight || 9) / (video.videoWidth || 16));
     const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const ctx = c.getContext('2d'); ctx.filter = 'grayscale(1)'; ctx.translate(w, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, w, h);
+    const ctx = c.getContext('2d'); ctx.translate(w, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, w, h); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    studioTone(c, ctx);
     flash.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => flash.classList.remove('on')));
     photo = c.toDataURL('image/jpeg', 0.72);
     noPhoto.checked = false;
@@ -393,6 +394,39 @@
     busy = false;
     validate();
   });
+
+  /* 사진관 느낌 흑백 보정: 밝고 부드럽게, 피부는 환하게, 그림자는 살짝 들어 올려요 */
+  const TONE = (() => {
+    const t = new Uint8ClampedArray(256);
+    for (let i = 0; i < 256; i++) {
+      let v = i / 255;
+      v = Math.pow(v, 0.8);                         // 중간 톤(피부)을 밝게
+      v = v * v * (3 - 2 * v) * 0.5 + v * 0.5;      // 부드러운 S커브로 머리·옷의 검정은 또렷하게
+      v = 0.025 + v * 0.965;                        // 검정은 아주 살짝만 띄우고 흰색은 날리지 않게
+      t[i] = Math.round(Math.min(1, v) * 255);
+    }
+    return t;
+  })();
+  function studioTone(c, ctx) {
+    const { width: w, height: h } = c;
+    const img = ctx.getImageData(0, 0, w, h), d = img.data, n = d.length / 4;
+    const Y = new Uint8Array(n), hist = new Uint32Array(256);
+    for (let i = 0, j = 0; j < n; i += 4, j++) { const y = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) | 0; Y[j] = y; hist[y]++; }
+    /* 자동 레벨: 카메라·조명마다 다른 밝기를 펴서, 가장 어두운 곳은 검정, 가장 밝은 곳은 흰색이 되게 해요 */
+    let lo = 0, hi = 255, acc = 0;
+    for (; lo < 255; lo++) { acc += hist[lo]; if (acc > n * 0.01) break; }
+    for (acc = 0; hi > 0; hi--) { acc += hist[hi]; if (acc > n * 0.005) break; }
+    if (hi - lo < 40) { lo = 0; hi = 255; }
+    const map = new Uint8ClampedArray(256);
+    for (let v = 0; v < 256; v++) map[v] = TONE[Math.max(0, Math.min(255, Math.round((v - lo) * 255 / (hi - lo))))];
+    for (let i = 0, j = 0; j < n; i += 4, j++) d[i] = d[i + 1] = d[i + 2] = map[Y[j]];
+    ctx.putImageData(img, 0, 0);
+    /* 부드러운 빛번짐으로 피부결을 매끈하게 */
+    const g = document.createElement('canvas'); g.width = w; g.height = h;
+    const gx = g.getContext('2d'); gx.filter = 'blur(7px)'; gx.drawImage(c, 0, 0);
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.16; ctx.drawImage(g, 0, 0); ctx.restore();
+    ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = 0.25; ctx.drawImage(g, 0, 0); ctx.restore();
+  }
 
   function showPreview() {
     $$('.shot-img, .retake', preview).forEach(n => n.remove());
@@ -494,10 +528,30 @@
       return;
     }
     const z = e.target.closest('[data-zoom]');
-    if (z) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
+    if (z && zoomOn) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
   });
   lb.addEventListener('click', () => lb.classList.remove('on'));
   addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+
+  /* 사진 확대는 기본으로 잠겨 있어요. 주소 끝에 ?unlock=비밀번호 를 붙여 열면 그 브라우저에서만 풀리고,
+     ?lock 을 붙여 열면 다시 잠겨요. 비밀번호는 코드에 해시로만 들어 있어요. */
+  const ZK = 'axis-zoom-unlock', ZH = '6cab0b347dbb36f79a74bbeef02715e2cc18d47b94553c8beea2b08788990ebd';
+  let zoomOn = getJSON(ZK, false) === true;
+  const applyZoom = () => document.documentElement.classList.toggle('zoom-on', zoomOn);
+  applyZoom();
+  (async () => {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('unlock') && !q.has('lock')) return;
+    if (q.has('lock')) { zoomOn = false; setJSON(ZK, false); say('사진 확대를 잠갔어요.'); }
+    const code = q.get('unlock');
+    if (code && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(code));
+      const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hex === ZH) { zoomOn = true; setJSON(ZK, true); say('사진 확대가 풀렸어요.'); }
+    }
+    applyZoom();
+    history.replaceState(null, '', location.pathname + location.hash);
+  })();
 
   render();
   validate();
