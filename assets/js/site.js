@@ -494,10 +494,30 @@
       return;
     }
     const z = e.target.closest('[data-zoom]');
-    if (z) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
+    if (z && zoomOn) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
   });
   lb.addEventListener('click', () => lb.classList.remove('on'));
   addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+
+  /* 사진 확대는 기본으로 잠겨 있어요. 주소 끝에 ?unlock=비밀번호 를 붙여 열면 그 브라우저에서만 풀리고,
+     ?lock 을 붙여 열면 다시 잠겨요. 비밀번호는 코드에 해시로만 들어 있어요. */
+  const ZK = 'axis-zoom-unlock', ZH = '6cab0b347dbb36f79a74bbeef02715e2cc18d47b94553c8beea2b08788990ebd';
+  let zoomOn = getJSON(ZK, false) === true;
+  const applyZoom = () => document.documentElement.classList.toggle('zoom-on', zoomOn);
+  applyZoom();
+  (async () => {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('unlock') && !q.has('lock')) return;
+    if (q.has('lock')) { zoomOn = false; setJSON(ZK, false); say('사진 확대를 잠갔어요.'); }
+    const code = q.get('unlock');
+    if (code && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(code));
+      const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hex === ZH) { zoomOn = true; setJSON(ZK, true); say('사진 확대가 풀렸어요.'); }
+    }
+    applyZoom();
+    history.replaceState(null, '', location.pathname + location.hash);
+  })();
 
   render();
   validate();

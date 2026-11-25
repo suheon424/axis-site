@@ -346,7 +346,8 @@ button.chip { border: 0; cursor: pointer; transition: background .25s, color .25
 .board .c-nm { width: 150px; text-align: center; font-size: 14px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
 .board .c-dt { width: 150px; text-align: center; font-size: 14px; color: var(--muted); white-space: nowrap; }
 .board .thumb { width: 64px; height: 64px; border-radius: 8px; background: var(--bg-gray); overflow: hidden; display: grid; place-items: center; }
-.board .thumb img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; filter: grayscale(1); }
+.board .thumb img { width: 100%; height: 100%; object-fit: cover; cursor: default; filter: grayscale(1); }
+.zoom-on .board .thumb img { cursor: zoom-in; }
 .board .thumb img.ic { filter: none; }
 .board .thumb img.ic { width: 22px; height: 22px; cursor: default; }
 .board .del { flex: none; border: 0; background: none; color: #b8bec8; font-size: 12px; cursor: pointer; padding: 4px 6px; }
