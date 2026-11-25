@@ -324,23 +324,33 @@
   }
 
   /* ───────── 방명록 ───────── */
-  const KEY = 'axis-guestbook-v3', OLD = 'axis-guestbook-v2';
-  const SEED = [
-    { id: 's24', name: '익명', msg: '졸업 전시 축하해요! 큐브에서 시작한 로고 이야기가 정말 인상적이었어요.', photo: '', date: '2026.11.21', seed: true },
-    { id: 's23', name: '익명', msg: '계획이 틀어져도 다시 맞추면 된다는 말이 오늘 제일 큰 위로가 됐어요.', photo: '', date: '2026.11.21', seed: true },
-  ];
-  const read = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : null; } catch { return null; } };
-  const load = () => read(KEY);
-  const save = arr => { try { localStorage.setItem(KEY, JSON.stringify(arr)); return true; } catch { return false; } };
-  /* 예전 버전에 저장된 글이 있으면, 예시 글만 빼고 방문자가 남긴 글은 옮겨 와요 */
-  const migrate = () => {
-    const old = read(OLD); if (!old) return null;
-    const mine = old.filter(e => !e.seed);
-    const arr = [...mine, ...SEED]; save(arr);
-    try { localStorage.removeItem(OLD); } catch {}
-    return arr;
-  };
-  let entries = (load() || migrate() || SEED.slice()).map(e => e.seed ? (SEED.find(s => s.id === e.id) || e) : e);
+  /* 글과 사진은 Supabase에 저장돼서 어느 기기에서 열어도 같은 방명록이 보여요.
+     삭제 열쇠는 글을 쓴 브라우저에만 남아서, 그 브라우저에서만 지울 수 있어요. */
+  const SB = 'https://mmhhibevzfbhjjuxkcul.supabase.co';
+  const SBK = 'sb_publishable_4KdBUWT9je0K_I-pWnZU_g_tJz-hTtN';
+  const MINE = 'axis-guestbook-mine', CACHE = 'axis-guestbook-cache';
+  const getJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+  const setJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const mine = getJSON(MINE, {});
+  const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+  const api = (path, opt = {}) => fetch(SB + path, { ...opt, headers: { apikey: SBK, ...(opt.headers || {}) } }).then(async r => {
+    if (!r.ok) throw new Error(r.status + ' ' + (await r.text().catch(() => '')));
+    return r.status === 204 ? null : r.json().catch(() => null);
+  });
+  const fmtDate = iso => { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
+  const toEntry = r => ({ id: r.id, name: r.name || '익명', msg: r.msg, photo: r.photo_url || '', date: fmtDate(r.created_at), mine: !!mine[r.id] });
+  let entries = getJSON(CACHE, []).map(toEntry);
+  let loading = false;
+  async function refresh() {
+    if (loading) return; loading = true;
+    try {
+      const rows = await api('/rest/v1/guestbook?select=id,name,msg,photo_url,created_at&order=created_at.desc&limit=500');
+      setJSON(CACHE, rows);
+      entries = rows.map(toEntry);
+      render();
+    } catch (err) { console.warn('방명록을 불러오지 못했어요', err); }
+    finally { loading = false; }
+  }
 
   const camBox = $('#camBox'), video = $('#camVideo'), camMsg = $('#camMsg'), camCount = $('#camCount'), flash = $('#camFlash');
   const shutter = $('#shutter'), preview = $('#preview'), pvEmpty = $('#pvEmpty');
@@ -405,20 +415,32 @@
   let toastT;
   const say = t => { toast.textContent = t; clearTimeout(toastT); toastT = setTimeout(() => (toast.textContent = ''), 3500); };
 
-  $('#gbForm').addEventListener('submit', e => {
+  let sending = false;
+  $('#gbForm').addEventListener('submit', async e => {
     e.preventDefault();
-    if (submit.disabled) return;
-    const item = { id: 'u' + Date.now(), name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo, date: today(), mine: true };
-    const next = [item, ...entries];
-    if (!save(next)) {
-      // 저장 공간이 부족하면 사진을 더 작게 줄여서 다시 시도
-      if (photo) { item.photo = ''; if (!save(next)) { say('저장 공간이 부족해요. 오래된 글을 지워 주세요.'); return; } say('저장 공간이 부족해 사진 없이 등록했어요.'); }
-      else { say('저장하지 못했어요.'); return; }
-    } else say('방명록이 등록됐어요. 고마워요!');
-    entries = next;
-    nameEl.value = ''; msgEl.value = ''; photo = ''; noPhoto.checked = false; showPreview(); validate();
-    page = 1; render();
-    $('.s-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (submit.disabled || sending) return;
+    sending = true; submit.disabled = true; say('등록하는 중이에요…');
+    const id = uuid(), token = uuid();
+    try {
+      let photo_url = null;
+      if (photo) {
+        const blob = await (await fetch(photo)).blob();
+        await api(`/storage/v1/object/guestbook/${id}.jpg`, { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: blob });
+        photo_url = `${SB}/storage/v1/object/public/guestbook/${id}.jpg`;
+      }
+      await api('/rest/v1/guestbook', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo_url, owner_token: token }) });
+      mine[id] = token; setJSON(MINE, mine);
+      entries = [{ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo: photo_url || '', date: today(), mine: true }, ...entries];
+      say('방명록이 등록됐어요. 고마워요!');
+      nameEl.value = ''; msgEl.value = ''; photo = ''; noPhoto.checked = false; showPreview();
+      page = 1; render();
+      $('.s-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      refresh();
+    } catch (err) {
+      console.warn('방명록 등록 실패', err);
+      say('등록하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
+    } finally { sending = false; validate(); }
   });
 
   /* 목록 */
@@ -461,7 +483,15 @@
     if (d) {
       const id = d.dataset.del;
       if (armed !== id) { armed = id; render(); setTimeout(() => { if (armed === id) { armed = null; render(); } }, 3000); return; }
-      entries = entries.filter(x => x.id !== id); armed = null; save(entries); render(); return;
+      armed = null;
+      api('/rest/v1/rpc/delete_guestbook_entry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_id: id, p_token: mine[id] }) })
+        .then(ok => {
+          if (!ok) { say('이 글은 지울 수 없어요.'); return; }
+          delete mine[id]; setJSON(MINE, mine);
+          entries = entries.filter(x => x.id !== id); render();
+        })
+        .catch(err => { console.warn('삭제 실패', err); say('삭제하지 못했어요. 인터넷 연결을 확인해 주세요.'); });
+      return;
     }
     const z = e.target.closest('[data-zoom]');
     if (z) { lb.querySelector('img').src = z.src; lb.classList.add('on'); }
@@ -471,4 +501,7 @@
 
   render();
   validate();
+  refresh();
+  /* 전시장의 다른 기기에서 남긴 글도 보이도록 30초마다 새로 불러와요 */
+  setInterval(() => { if (!document.hidden) refresh(); }, 30000);
 })();
