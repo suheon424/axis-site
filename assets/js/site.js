@@ -77,12 +77,15 @@
     });
   };
   if ('IntersectionObserver' in window) {
+    /* 화면에 들어오면 나타나고, 화면 밖으로 완전히 나가면 다시 숨겨서 돌아올 때마다 효과가 다시 실행돼요 */
     const io = new IntersectionObserver(es => {
-      const hit = es.filter(e => e.isIntersecting).map(e => e.target);
-      hit.forEach(el => io.unobserve(el));
+      const hit = es.filter(e => e.isIntersecting && !e.target.classList.contains('in')).map(e => e.target);
       if (hit.length) show(hit);
     }, { rootMargin: '0px 0px -10% 0px' });
-    items.forEach(el => io.observe(el));
+    const out = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) { e.target.style.transitionDelay = ''; e.target.classList.remove('in'); }
+    }), { rootMargin: '0px' });
+    items.forEach(el => { io.observe(el); out.observe(el); });
     /* 영상은 화면에 보일 때만 재생 */
     const vio = new IntersectionObserver(es => es.forEach(e => {
       const v = e.target;
