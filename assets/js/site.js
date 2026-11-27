@@ -363,20 +363,39 @@
 
   const setMsg = (title, sub) => { camMsg.hidden = false; camMsg.innerHTML = ''; camMsg.append(title); if (sub) { const s = document.createElement('small'); s.textContent = sub; camMsg.append(s); } };
 
+  const live = () => !!stream && stream.getVideoTracks().some(t => t.readyState === 'live');
+  const stopCam = () => { if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; video.hidden = true; };
+  const camError = err => {
+    const n = err && err.name;
+    if (n === 'NotAllowedError' || n === 'SecurityError') return ['카메라 권한이 막혀 있어요', '주소창 왼쪽 자물쇠 → 카메라 → 허용으로 바꾼 뒤 다시 눌러 주세요.'];
+    if (n === 'NotReadableError' || n === 'AbortError') return ['다른 앱이 카메라를 쓰고 있어요', 'FaceTime·Zoom 같은 앱이나 다른 탭을 닫고 다시 눌러 주세요.'];
+    if (n === 'NotFoundError' || n === 'OverconstrainedError') return ['카메라를 찾지 못했어요', '카메라가 연결돼 있는지 확인하고 다시 눌러 주세요.'];
+    return ['카메라를 켜지 못했어요', '다시 눌러 주세요. 사진 없이도 글을 남길 수 있어요.'];
+  };
   async function startCam() {
-    if (stream) return true;
+    if (live()) { if (video.paused) await video.play().catch(() => {}); return true; }
+    stopCam();
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) { setMsg('카메라를 쓸 수 없어요', 'https 주소에서 열어 주세요. 사진 없이도 글을 남길 수 있어요.'); return false; }
     setMsg('카메라를 켜는 중…');
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'user' }, audio: false });
-      video.srcObject = stream; video.hidden = false; await video.play().catch(() => {});
-      camMsg.hidden = true; camBox.setAttribute('aria-label', '카메라 화면');
-      return true;
-    } catch (err) {
-      setMsg('카메라를 켜지 못했어요', err && err.name === 'NotAllowedError' ? '브라우저에서 카메라 권한을 허용해 주세요.' : '카메라가 연결돼 있는지 확인해 주세요.');
-      return false;
+    /* 고화질을 먼저 시도하고, 안 되면 카메라 기본 설정으로 다시 시도해요 */
+    const tries = [
+      { video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'user' }, audio: false },
+      { video: true, audio: false },
+    ];
+    let lastErr;
+    for (const c of tries) {
+      try { stream = await navigator.mediaDevices.getUserMedia(c); break; }
+      catch (err) { lastErr = err; if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) break; }
     }
+    if (!stream) { const [t, sub] = camError(lastErr); setMsg(t, sub); console.warn('camera', lastErr); return false; }
+    stream.getVideoTracks().forEach(t => t.addEventListener('ended', () => { stopCam(); setMsg('카메라 연결이 끊겼어요', '눌러서 다시 켜 주세요.'); }));
+    video.srcObject = stream; video.hidden = false; video.muted = true;
+    await video.play().catch(() => {});
+    camMsg.hidden = true; camBox.setAttribute('aria-label', '카메라 화면');
+    return true;
   }
+  /* 화면이 잠들었다 깨거나 탭을 다시 열었을 때 멈춘 영상을 다시 재생해요 */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && live() && video.paused) video.play().catch(() => {}); });
   camBox.addEventListener('click', startCam);
   camBox.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startCam(); } });
 
@@ -384,6 +403,7 @@
     if (busy) return;
     if (!(await startCam())) return;
     busy = true;
+    if (!video.videoWidth) await Promise.race([new Promise(r => video.addEventListener('loadeddata', r, { once: true })), wait(2000)]);
     camCount.hidden = false;
     for (const n of [3, 2, 1]) { camCount.textContent = n; await wait(700); }
     camCount.hidden = true;
