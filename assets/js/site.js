@@ -342,7 +342,9 @@
   });
   const fmtDate = iso => { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
   const postedAt = {}; // 이 브라우저에서 방금 올린 글의 올린 시각
-  const toEntry = r => ({ id: r.id, name: r.name || '익명', msg: r.msg, photo: r.photo_url || '', date: fmtDate(r.created_at), at: postedAt[r.id] || Date.parse(r.created_at) || 0, mine: !!mine[r.id] });
+  const localPhoto = {}; // 방금 찍은 사진은 서버에서 다시 받지 않고 바로 보여 줘요
+  const pending = new Map(); // 아직 서버에 저장 중인 글 (목록에는 먼저 보여 줘요)
+  const toEntry = r => ({ id: r.id, name: r.name || '익명', msg: r.msg, photo: localPhoto[r.id] || r.photo_url || '', date: fmtDate(r.created_at), at: postedAt[r.id] || Date.parse(r.created_at) || 0, mine: !!mine[r.id] });
   let entries = getJSON(CACHE, []).map(toEntry);
   let loading = false;
   async function refresh() {
@@ -350,7 +352,9 @@
     try {
       const rows = await api('/rest/v1/guestbook?select=id,name,msg,photo_url,created_at&order=created_at.desc&limit=500');
       setJSON(CACHE, rows);
-      entries = rows.map(toEntry);
+      /* 저장 중인 글은 서버 목록에 아직 없을 수 있어서 맨 위에 그대로 둬요 */
+      const got = new Set(rows.map(r => r.id));
+      entries = [...[...pending.values()].filter(e => !got.has(e.id)), ...rows.map(toEntry)];
       render();
     } catch (err) { console.warn('방명록을 불러오지 못했어요', err); }
     finally { loading = false; }
@@ -473,33 +477,47 @@
   let toastT;
   const say = t => { toast.textContent = t; clearTimeout(toastT); toastT = setTimeout(() => (toast.textContent = ''), 3500); };
 
-  let sending = false;
+  /* 등록을 누르면 글을 목록에 바로 보여 주고, 사진 업로드와 저장은 뒤에서 함께 진행해요.
+     저장에 실패하면 목록에서 빼고, 쓴 내용을 입력칸에 되돌려 놓아요. */
   $('#gbForm').addEventListener('submit', async e => {
     e.preventDefault();
-    if (submit.disabled || sending) return;
-    sending = true; submit.disabled = true; say('등록하는 중이에요…');
+    if (submit.disabled) return;
     const id = uuid(), token = uuid();
-    try {
-      let photo_url = null;
-      if (photo) {
-        const blob = await (await fetch(photo)).blob();
-        await api(`/storage/v1/object/guestbook/${id}.jpg`, { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: blob });
-        photo_url = `${SB}/storage/v1/object/public/guestbook/${id}.jpg`;
-      }
-      await api('/rest/v1/guestbook', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify({ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo_url, owner_token: token }) });
+    const name = nameEl.value.trim() || '익명', msg = msgEl.value.trim(), shot = photo;
+    const photo_url = shot ? `${SB}/storage/v1/object/public/guestbook/${id}.jpg` : null;
+    postedAt[id] = Date.now();
+    if (shot) localPhoto[id] = shot;
+    const entry = { id, name, msg, photo: shot, date: today(), at: postedAt[id], mine: false, saving: true };
+    pending.set(id, entry);
+    entries = [entry, ...entries];
+    nameEl.value = ''; msgEl.value = ''; photo = ''; noPhoto.checked = false; showPreview(); validate();
+    page = 1; filterEl.value = 'all'; render();
+    $('.s-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    say('방명록이 등록됐어요. 고마워요!');
+
+    const upload = shot ? fetch(shot).then(r => r.blob()).then(blob =>
+      api(`/storage/v1/object/guestbook/${id}.jpg`, { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: blob })) : Promise.resolve();
+    const insert = api('/rest/v1/guestbook', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ id, name, msg, photo_url, owner_token: token }) });
+    const [up, ins] = await Promise.allSettled([upload, insert]);
+    pending.delete(id);
+    if (up.status === 'fulfilled' && ins.status === 'fulfilled') {
       mine[id] = token; setJSON(MINE, mine);
-      postedAt[id] = Date.now();
-      entries = [{ id, name: nameEl.value.trim() || '익명', msg: msgEl.value.trim(), photo: photo_url || '', date: today(), at: postedAt[id], mine: true }, ...entries];
-      say('방명록이 등록됐어요. 고마워요!');
-      nameEl.value = ''; msgEl.value = ''; photo = ''; noPhoto.checked = false; showPreview();
-      page = 1; render();
-      $('.s-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      refresh();
-    } catch (err) {
-      console.warn('방명록 등록 실패', err);
-      say('등록하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
-    } finally { sending = false; validate(); }
+      entries = entries.map(x => x.id === id ? { ...x, mine: true, saving: false } : x);
+      render();
+      return;
+    }
+    console.warn('방명록 등록 실패', up.reason || ins.reason);
+    /* 글은 저장됐는데 사진만 실패했으면, 사진 없는 글이 남지 않게 지워요 */
+    if (ins.status === 'fulfilled') api('/rest/v1/rpc/delete_guestbook_entry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p_id: id, p_token: token }) }).catch(() => {});
+    delete localPhoto[id];
+    entries = entries.filter(x => x.id !== id); render();
+    if (!msgEl.value && !nameEl.value && !photo) {
+      nameEl.value = name === '익명' ? '' : name; msgEl.value = msg;
+      if (shot) { photo = shot; showPreview(); } else noPhoto.checked = true;
+      validate();
+    }
+    say('등록하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
   });
 
   /* 목록 */
@@ -525,7 +543,7 @@
       const fresh = Date.now() - e.at < FRESH;
       const ph = e.photo ? `<div class="thumb"><img src="${e.photo}" alt="${esc(e.name)}님의 사진" data-zoom data-at="${e.at}"${fresh ? ' class="fresh"' : ''}></div>` : '–';
       const tag = e.photo ? '' : '<span class="tag">글만</span>';
-      const del = e.mine ? `<button class="del" type="button" data-del="${e.id}">${armed === e.id ? '정말 삭제' : '삭제'}</button>` : '';
+      const del = e.saving ? '<span class="saving">저장 중…</span>' : e.mine ? `<button class="del" type="button" data-del="${e.id}">${armed === e.id ? '정말 삭제' : '삭제'}</button>` : '';
       html += `<div class="row"><div class="c-no">${no}</div><div class="c-ph">${ph}</div><div class="c-tx">${tag}<p title="${esc(e.msg)}">${esc(e.msg)}</p>${del}</div><div class="c-nm">${esc(e.name)}</div><div class="c-dt">${e.date}</div></div>`;
     });
     board.innerHTML = html;
